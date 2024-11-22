@@ -7,7 +7,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - C:/data/db1:/data/db
+      - ./data/db1:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
 
   db2:
@@ -16,7 +16,7 @@ services:
     ports:
       - "27018:27017"
     volumes:
-      - C:/data/db2:/data/db
+      - ./data/db2:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
 
   db3:
@@ -25,7 +25,7 @@ services:
     ports:
       - "27019:27017"
     volumes:
-      - C:/data/db3:/data/db
+      - ./data/db3:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
 
   db4:
@@ -34,7 +34,7 @@ services:
     ports:
       - "27020:27017"
     volumes:
-      - C:/data/db4:/data/db
+      - ./data/db4:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
 
   Userdb:
@@ -43,5 +43,5 @@ services:
     ports:
       - "27021:27017"
     volumes:
-      - C:/data/Userdb:/data/db
+      - ./data/Userdb:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]

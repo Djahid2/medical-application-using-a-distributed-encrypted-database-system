@@ -23,12 +23,16 @@ Ensure that the following directories exist on your machine to store MongoDB dat
 
 ```plaintext
 
-C:\data
-    ├── db1
-    ├── db2
-    ├── db3
-    ├── db4
-    └── Userdb
+mongo-distribution/
+├── data/
+│   ├── db1/
+│   ├── db2/
+│   ├── db3/
+│   ├── db4/
+│   └── Userdb/
+├── docker-compose.yml
+└── other-project-files/
+
     
 
 ```
@@ -42,10 +46,11 @@ docker-compose up -d
 Or you can run it without docker :
 
 ```bash
-mongod --port 27017 --dbpath C:\data\db1 --logpath C:\data\db1\mongo.log
-mongod --port 27018 --dbpath C:\data\db2 --logpath C:\data\db2\mongo.log
-mongod --port 27019 --dbpath C:\data\db3 --logpath C:\data\db3\mongo.log
-mongod --port 27020 --dbpath C:\data\db4 --logpath C:\data\db4\mongo.log
+mongod --port 27017 --dbpath .\data\db1 --logpath .\data\db1\mongo.log
+mongod --port 27018 --dbpath .\data\db2 --logpath .\data\db2\mongo.log
+mongod --port 27019 --dbpath .\data\db3 --logpath .\data\db3\mongo.log
+mongod --port 27020 --dbpath .\data\db4 --logpath .\data\db4\mongo.log
+mongod --port 27020 --dbpath .\data\Userdb --logpath .\data\Userdb\mongo.log
 ```
 
 To Insert data into the database:
