@@ -1,0 +1,74 @@
+.bar {
+    position: fixed;
+    width: 120px;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    border-right: 1px solid var(--b);
+    background-color: var(--color-two);
+    display: flex;
+    flex-direction: column;
+    .logo {
+        img {
+            width: 120px;
+        }
+        border-bottom: 1px solid var(--b);
+    }
+    ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 0 ;
+        gap: 20px;
+        li {
+            width: fit-content;
+            a {
+                $w:60px;
+                width: $w;
+                height: $w; 
+                color: beige;
+                background-color: var(--t);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid transparent;
+                transition: 0.4s;
+                cursor: pointer;
+                position: relative;
+                z-index: 3;
+                &::after {
+                    content: attr(data);
+                    position: absolute;
+                    top: 50%;
+                    left: calc(100% + 30px);
+                    background-color: var(--t);
+                    text-align: center;
+                    border-radius: 10px;
+                    color: beige;
+                    transform: translateY(-50%);
+                    transition: 0.4s;
+                    padding: 0 0;
+                    width: 0;
+                    overflow: hidden;
+                    z-index: 3;
+                }
+                &.active {
+                    border-color: var(--t);
+                    background-color: transparent;
+                    color: var(--t);
+                }
+                &:hover::after {
+                    width: 123px;
+                    padding: 12px 20px;
+                }
+                &:hover  {
+                    border-color: var(--t);
+                    background-color: transparent;
+                    color: var(--t);
+                }
+            }
+        }
+        
+    }
+}

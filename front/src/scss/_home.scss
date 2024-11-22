@@ -1,0 +1,136 @@
+.Home {
+    margin: 0;
+    padding:0 ;
+    .lading {
+        height: calc(100vh - 94px);
+        display: grid;
+        grid-template-columns: 2fr 3fr 2fr;
+        // overflow-y:hidden ;
+        > div {
+            max-height:calc(100vh - 94px) ;
+        }
+        .one {
+            display: flex;
+            flex-direction: column;
+            > div {
+                flex: 1;
+            }
+            .botm-one {
+                padding: 20px;
+                p {
+                    font-weight: 500;
+                    text-transform: capitalize;
+                    line-height: 1.6;
+                    font-size: 22px;
+                    margin-bottom: 30px;
+                }
+                a {
+                    padding: 12px 16px;
+                    background-color: var(--t);
+                    color: beige;
+                    font-size: 20px;
+                    border-radius: 20px;
+                    text-align: center;
+                    
+                    width: fit-content;
+                }
+            }
+            .top-one {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-top: 1px solid var(--b);
+                height: 50%;
+                img {
+                    height: 80%;
+                    border-radius: 20px;
+                }
+            }
+        }
+        .two {
+            .bottom {
+                padding: 20px;
+                p {
+                    span {
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        color: black;
+                        }   
+                    font-weight: normal;
+                    font-size: 20px;
+                    line-height: 1.8;
+                    text-transform: capitalize;
+                }
+            }
+            
+            
+            border-left: 1px solid var(--b);
+            border-right: 1px solid var(--b);
+            .top {
+                display: grid;
+                grid-template-columns: repeat(6,1fr);
+                position: relative;
+                isolation: isolate;
+                p {
+                    z-index: -1;
+                    position: absolute;
+                    color: var(--t);
+                    font-family: 'GeistMono';
+                    font-size: 82px;
+                    top: 45%;
+                    right: 0;
+                    text-align: right;
+                    transform: translateY(-50%);
+                    text-transform: capitalize;
+                }
+                .fist , .last {
+                    display: flex;
+                    background-color: var(--t);
+                    align-items: center;
+                    justify-content: center;
+                    color: beige;
+                    font-size: 22px;
+                    font-weight: 300;
+                }
+                .box {
+                    cursor: pointer;
+                    border: 1px solid var(--b);
+                    border-color: transparent var(--b) var(--b) transparent;
+                    height: 70px;
+                    transition: 0.4s;
+                    &.n {
+                        border-color: transparent transparent var(--b) transparent;
+                        
+                    }
+                    &.hoverd {
+                        background-color: var(--t);
+                    }
+                }
+            }
+        }
+        .three {
+            .three-top {
+                padding: 40px 0; 
+                border-bottom: 1px solid var(--b);
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                align-items: center;
+                height: 70%;
+                img {
+                    // max-width: 80%;
+                    border-radius: 20px;
+                    height: 90%;
+                }
+                q {
+                    font-weight: 700;
+                    font-size: 22px;
+                    font-family: 'GeistMono';
+                    word-spacing: -4px;
+                }
+            }
+        }
+    }
+}

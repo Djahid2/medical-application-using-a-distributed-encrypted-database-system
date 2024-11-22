@@ -1,0 +1,249 @@
+.userdata {
+    padding: 40px 15px;
+    .moreinfo {
+        transition: 0.4s;
+        padding: 40px 20px;
+        position: fixed;
+        z-index: 5;
+        background-color: beige;
+        top: -100%;
+        right:0 ;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        width: calc(100% - 120px);
+        display: flex;
+        border: 1px solid transparent ;
+        border-color: transparent var(--t) var(--t);
+        border-bottom-width: 2px;
+        &.active {
+            top: 0;
+        }
+        > {
+            .icon {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                $w:40px;
+                width: $w;
+                height: $w; 
+                color: beige;
+                background-color: var(--t);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid transparent;
+                transition: 0.4s;
+                cursor: pointer;
+                &:hover {
+                    border-color: var(--t);
+                    background-color: transparent;
+                    color: var(--t);
+                }
+            }
+        }
+        .intro {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-basis: 30%;
+            position: relative;
+            
+            button {
+                transition: 0.4s;
+                border-radius: 50px;
+                border: 2px solid transparent;
+                padding: 12px 20px;
+                color: white;
+                background-color: var(--t);
+                cursor: pointer;
+                width: 160px;
+                margin-left: auto;
+                margin-right: auto;
+                &:hover {
+                    color: var(--t);
+                    background-color: white;
+                    border-color: var(--color-one);
+                }
+            }
+            &::after {
+                content: '';
+                position: absolute;
+                height: calc(100% + 20px);
+                width: 2px;
+                background-color: var(--t);
+                top: -10px;
+                right: 10px;
+            }
+            p {
+                color: black;
+                font-weight: 600;
+                font-size: 22px;
+                text-transform: capitalize;
+            }
+            span {
+                margin-top: 10px;
+                display: block;
+                text-transform: capitalize;
+
+            }
+        }
+        form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            input {
+                padding: 8px 20px;
+                border: 2px solid var(--color-two);
+                border-radius: 16px;
+                transition: 0.3s;
+                color: var(--t);
+                
+                &:focus {
+                    outline: none;
+                    border-color: var(--color-one);
+                }
+                &::placeholder {
+                    font-weight: 500;
+                    text-transform: capitalize;
+
+                }
+            }
+            label {
+                font-weight: 500;
+                text-transform: capitalize;
+                margin-left: 10px;
+            }
+            
+        }
+    }
+    .text {
+        margin-bottom: 60px;
+        
+        h2 {
+            font-weight: 800;
+            font-size: 28px;
+            text-transform: capitalize;
+            margin-bottom: 17px;
+
+            span {
+                background-color: var(--t);
+                padding: 4px;
+                color: var(--color-one);
+                margin: 0 3px;
+                font-family: 'GeistMono';
+                margin-top: 10px;
+            }
+        }
+
+        p {
+            position: relative;
+            text-transform: capitalize;
+            padding-left: 25px;
+
+            &::after {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background-color: var(--color-t);
+                border-radius: 50%;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: -30px;
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 2px;
+                background-color: var(--t);
+                left: 0;
+                bottom: -22px;
+            }
+        }
+    }
+
+    .info {
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            button {
+                padding: 6px 12px;
+                border: 2px solid transparent;
+                font-weight: 500;
+                font-size: 14px;
+                border-radius: 7px;
+                color: var(--t);
+                color: beige;
+                cursor: pointer;
+            }
+            button[do='remove'] {
+                background-color: rgb(172, 6, 6);
+                margin-right: 20px;
+                transition: 0.2s;
+                opacity: 0;
+                visibility: hidden;
+                &.active {
+                    opacity: 1;
+                    visibility: visible;
+                }
+            }
+            button[do='add'] {
+                background-color: rgb(11, 94, 11);
+            }
+        }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th {
+            background-color: var(--t);
+            color: beige;
+        }
+        td,
+        th {
+            border: 1px solid var(--t);
+            text-align: left;
+            padding: 18px 8px;
+        }
+        
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        tr:not(:first-child) {
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        tr.selected {
+            background-color: var(--b);
+            color: beige;
+        }
+        .switch{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 20px;
+            button {
+                padding: 8px 14px ;
+                border: 2px solid var(--t);
+                font-weight: 500;
+                font-size:14px ;
+                background-color: beige;
+                cursor: pointer;
+                transition: 0.3s;
+                &.active {
+                    background-color: var(--t);
+                    color: beige;
+                }
+            }
+        }
+    }
+}
