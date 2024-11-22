@@ -33,7 +33,7 @@ C:\data
 To run the database using docker:
 
 ```bash
-docker-compose up --build
+docker-compose up -d
 ```
 
 Or you can run it without docker :
