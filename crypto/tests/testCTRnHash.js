@@ -1,3 +1,4 @@
+const { hasSubscribers } = require('diagnostics_channel');
 const Aes = require('../modules/aes.js'); // Import AES functionality
 require('../modules/aesCTR.js'); 
 const Hash = require("../modules/key.js");
@@ -27,3 +28,5 @@ console.log("Encrypted Data:", encryptedData);
 // Decrypt the data using your custom Aes.Ctr.decrypt function
 const decryptedData = Aes.Ctr.decrypt(encryptedData, key, 256);
 console.log("Decrypted Data:", decryptedData);
+
+console.log(key)
