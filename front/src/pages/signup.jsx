@@ -1,10 +1,17 @@
 import {useReducer , useState } from "react"
 import { NavLink } from "react-router-dom"
 import v from '../photos/lading.mp4'
+import axios from 'axios';
+
 export default function Signup() {
     const [haserror , setHaserror] = useState(false)
     const [merror , setMerror] = useState('')
     const [isWaiting , setWaiting] = useState(false)
+    const [passerror , setpasserror ] = useState()
+    const [etatpass , setetatpass] = useState(false)
+    const [Code , setCode] = useState()
+    const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+    const [step, setStep] = useState(1);
     const init = {
         name:'',
         email:'',
@@ -23,10 +30,55 @@ export default function Signup() {
             fild: e.target.id,
             payload: e.target.value
         })
+        if (e.target.id === "pass") {
+            checkPasswordStrength(e.target.value); // Vérification uniquement pour le mot de passe
+        }
     }
-    
-    function handSubmit(e) {
-        e.preventDefault()
+
+    const checkPasswordStrength = (password) => {
+        if (password === "") {
+            setpasserror(null);
+            return;
+        }
+
+        const lowercase = /[a-z]/;
+        const uppercase = /[A-Z]/;
+        const digit = /[0-9]/;
+        const specialChar = /[—’!"#$%&`()*+,\-./:;<=>?@\[\\\]^_'{|}~]/;
+
+        let score = 0;
+        let missingCriteria = [];
+
+        if (lowercase.test(password)) score++;
+        else missingCriteria.push("lowercase letters");
+
+        if (uppercase.test(password)) score++;
+        else missingCriteria.push("uppercase letters");
+
+        if (digit.test(password)) score++;
+        else missingCriteria.push("numbers");
+
+        if (specialChar.test(password)) score++;
+        else missingCriteria.push("special characters");
+
+        if (password.length < 6) missingCriteria.push(" Password must contain at least 6 characters ");
+            
+        if (score === 4) {
+            setpasserror(`Your password is Very Strong. ${missingCriteria.join(", ")}`);
+            setetatpass(false);
+        } else if (score === 3) {
+            setpasserror(`Your password is Strong. Try adding: ${missingCriteria.join(", ")}`);
+            setetatpass(false)
+        } else if (score === 2) {
+            setpasserror(`Your password is Weak. Consider adding: ${missingCriteria.join(", ")}`);
+            setetatpass(true)
+        } else {
+            setpasserror(`Your password is Very Weak<. Try including: ${missingCriteria.join(", ")}`);
+            setetatpass(true)
+        }
+    };
+    function Verfication() {
+      
         // console.log(newUser)
         setWaiting(true)
         setTimeout(()=>{
@@ -34,6 +86,9 @@ export default function Signup() {
                     if (newUser.name === '') { 
                             setHaserror(true)
                             setMerror('we are sory , you have to write your name')
+                    }else if(!newUser.email.includes('@')||!allowedDomains.includes(newUser.email.split('@')[1])){
+                        setHaserror(true)
+                        setMerror(`We are sorry, only emails from the following domains are allowed: ${allowedDomains.map(domain => `@${domain}`).join(', ')}`);
                     } else if (newUser.pass.toString().length < 6) {
                             setHaserror(true)
                             setMerror('The two password shoud be more than 6 caracters')
@@ -52,6 +107,47 @@ export default function Signup() {
         },2000)
         
     }
+function handSubmit(e){
+    e.preventDefault()
+    Verfication();
+    console.log(haserror)
+    if(!haserror && !etatpass){
+        axios.post('http://localhost:5000/auth/register',{
+            username:newUser.name,
+            email:newUser.email,
+            password:newUser.pass
+        }).then(response => {
+            setStep(2)
+            console.log(response.data)
+        }).catch((error) => {
+            console.log(error)
+            
+        })
+    }
+    console.log(step)
+}
+function handSubmit2(e){
+    setWaiting(true)
+    e.preventDefault()
+        axios.post('http://localhost:5000/auth/verify-code',{
+           Code : Code,
+           email:newUser.email,
+        }).then(response => {
+            setWaiting(false)
+            console.log("Response:", response.data);
+        }).catch((error) => {
+
+            console.log(error)
+            if( error.response.data.error){
+                setHaserror(true)
+                setMerror( error.response.data.error)
+            }
+            setWaiting(false)
+        })
+    
+}
+    
+    
     return (
         <div className="signup">
             <div className="container">
@@ -65,6 +161,7 @@ export default function Signup() {
                             {haserror ? <p>{merror}</p> : null}
                         </div>
                     </div>
+                    {step === 1 ?(
                     <div className="f">
                         <p className="top">Get Stared Now </p>
                         <p className="text">Enter your information and be a member of our Company</p>
@@ -72,15 +169,26 @@ export default function Signup() {
                             <label htmlFor="name">Your Name</label>
                             <input value={newUser.name} onChange={handlChange}  id="name" type="text" placeholder="Name..." />
                             <label htmlFor="email">Your Email</label>
-                            <input value={newUser.email} onChange={handlChange} id="email" type="email" placeholder="Email..." />
+                            <input value={newUser.email} onChange={handlChange} id="email" type="text" placeholder="Email..." />
                             <label htmlFor="pass">Enter A Password</label>
                             <input value={newUser.pass} onChange={handlChange} type="password" id="pass" placeholder="password..." />
+                            {passerror ? <p className="passerror"  style={{color: etatpass? "red":"green" }}>{passerror}</p> : null}
                             <label htmlFor="passr">confirm password</label>
                             <input value={newUser.passr} onChange={handlChange} id='passr' type="password" placeholder="confirm password..." />
                             <button style={{minHeight:'46px'}} type="submit">{isWaiting ? <span className="loader"></span> : 'Login'} </button>
-
                         </form>
+                        
                     </div>
+                    ):(
+                        <div className="f">
+                            <p className="top">Check your email </p>
+                        <p className="text">Enter your Code </p>
+                        <form onSubmit={handSubmit2}>
+                            <label htmlFor="Code">confirm password</label>
+                            <input value={Code} onChange={(e) => setCode(e.target.value) } id='Code' type="text"   />
+                            <button style={{minHeight:'46px'}} type="submit">{isWaiting ? <span className="loader"></span> : 'Confirm Code'} </button>
+                        </form>
+                        </div>                    )}
                 </div>
             </div>
         </div>

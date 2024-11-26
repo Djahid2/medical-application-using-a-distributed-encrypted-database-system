@@ -1,29 +1,21 @@
-const { MongoClient } = require("mongodb");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
-const NODE_URI = "mongodb://localhost:27021"; 
+const app = express();
+const PORT = 5000;
 
-const sampleUser = {
-  username: "usernameeee",
-  email: "usernameeee@gmail.com",
-  password: "password123", 
-};
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-async function addUser(data) {
-  const client = new MongoClient(NODE_URI);
+// Routes
+app.use('/auth', authRoutes);
 
-  try {
-    await client.connect();
-    const db = client.db("UserDB"); 
-    const collection = db.collection("User"); 
-    await collection.insertOne(data);
-    console.log("User created successfully!");
-  } finally {
-    await client.close();
-  }
-}
 
-async function main() {
-  await addUser(sampleUser);
-}
-
-main().catch(console.error);
+// Démarrer le serveur
+app.listen(PORT, () => {
+  console.log(`Serveur en cours d'exécution sur http://localhost:${PORT}`);
+});
