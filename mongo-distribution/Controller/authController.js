@@ -1,4 +1,4 @@
-const { addUser } = require('./userController');
+const { addUser,handleLoginAttempt } = require('./userController');
 const { sendVerificationEmail } = require('../service/mailService');
 const {connectToDatabase} = require('../Config/db')
 const crypto = require('crypto');
@@ -49,14 +49,19 @@ exports.login = async (req, res) => {
     const db = client.db("UserDB");
     const collection = db.collection("User");
     const existingUser = await collection.findOne({ email });
+    console.log('djaz mna ')
     if (!existingUser) {
       await client.close();
       return res.status(400).json({ error: "account not exist" });
     }
     if(existingUser.password !== password){
+      const loginResponse  = await handleLoginAttempt(existingUser._id, false)
       await client.close();
-      return res.status(400).json({ error: "password incorrect" });
+    
+      return res.status(400).json({ error: loginResponse.message });
     }
+    //dans le cas mot passe correct renitialser le nombre d'attente 
+     await handleLoginAttempt(existingUser._id, true)
     res.status(200).json({ username: existingUser.username });
     
   

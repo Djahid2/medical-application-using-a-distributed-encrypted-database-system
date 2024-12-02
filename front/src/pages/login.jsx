@@ -2,7 +2,7 @@ import { useContext, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "../context/userContent";
 import axios from 'axios';
-
+import Captcha from "./captcha";
 
 export default function Login() {
     const init = {
@@ -14,6 +14,9 @@ export default function Login() {
     const [emailerror ,setemailerror] = useState()
     const [passworderror ,setpassworderror ] = useState()
     const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+    const [isCaptchaValid, setCaptchaValid] = useState(false);
+    
+    const [step,setStep]= useState(1)
     const navigate = useNavigate()
     function reducer(user , action) {
         if (action.type === 'user') {
@@ -35,22 +38,22 @@ export default function Login() {
         setTimeout(()=>{
             if (!user.email.includes('@')||!allowedDomains.includes(user.email.split('@')[1]) ) {
                 setemailerror(`We are sorry, only emails from the following domains are allowed: ${allowedDomains.map(domain => `@${domain}`).join(', ')}`);
-            }else if(user.pass === 'admin'){
-                setemailerror(null)
-                setpassworderror(null)
-               
-            }else{
-                setemailerror(null)
-                setpassworderror('Invalide password')
-                
             }
             setWaiting(false)
         },2000)
     }
-    function  handSubmit(e){
+
+    function handSubmit0 (e){
         e.preventDefault()
         Verfication()
-        if(!emailerror && !passworderror){
+        if(!emailerror ){
+            setStep(2)
+        }
+    }
+    function  handSubmit(e){
+        e.preventDefault()
+        
+        if(isCaptchaValid){
           axios.post('http://localhost:5000/auth/login',{
             email : user.email,
             password : user.pass
@@ -59,9 +62,22 @@ export default function Login() {
             const info = {pass:true ,data: {name : response.data.username , email:user.email}}
             userAuth.setAuthor(info)
             navigate('/user/dashboard', {state : {isP:'yes' , name: response.data.username}})
-          }).catch((err)=>{
+          }).catch((err) => {
+            setStep(1)
             console.log(err)
-          })
+            if (err.response) {
+                // Vérifie si l'erreur provient de la réponse HTTP du serveur
+                console.error('Erreur HTTP:', err.response.status, err.response.data);
+                // Vous pouvez aussi afficher l'erreur directement dans l'UI si nécessaire
+                setpassworderror(err.response.data.error); // Par exemple, utilisez `err.response.data.error` si c'est ce qui est renvoyé par le serveur
+              } else if (err.request) {
+                // Si aucune réponse n'est reçue du serveur
+                console.error('Erreur de requête:', err.request);
+              } else {
+                // Pour toutes autres erreurs (comme des erreurs de configuration ou autres)
+                console.error('Erreur:', err.message);
+              }
+          });
            
           
         }
@@ -74,17 +90,22 @@ export default function Login() {
                     <div className="left">
                         <p className="top">WelCome Back !</p>
                         <p className="text">You can enter your account from here , just enter your information</p>
-                        
-                        <form onSubmit={handSubmit}>
+                     {step == 1 ? 
+                        <form onSubmit={handSubmit0}>
                             <label htmlFor="email">Your Email</label>
                             <input value={user.email} onChange={handlChange} id="email" type="text" placeholder="Email..." />
                             {emailerror? <p className="errore">{emailerror}</p> : null }
                             <label htmlFor="pass">Enter A Password</label>
                             <input value={user.pass} onChange={handlChange} type="password" id="pass" placeholder="password..." />
                             {passworderror? <p  className="errore">{passworderror}</p>:null}
+                            
                             <button style={{minHeight:'46px'}} type="submit"> {isWaiting ? <span className="loader"></span> : 'Login'} </button>
                         </form>
-                        
+
+                      : <form onSubmit={handSubmit}>
+                        <Captcha onVerify={setCaptchaValid}  />
+                        </form>
+                        }
                     </div>
                     <div className="right">
                         <p>thanks for choosing us</p>
