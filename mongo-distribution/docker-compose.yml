@@ -1,9 +1,8 @@
-version: '3.8'
 
 services:
   db1:
     image: mongo:latest
-    container_name: db1
+    container_name: Host
     ports:
       - "27017:27017"
     volumes:
@@ -39,9 +38,9 @@ services:
 
   Userdb:
     image: mongo:latest
-    container_name: Userdb
+    container_name: db5
     ports:
       - "27021:27017"
     volumes:
-      - ./data/Userdb:/data/db
+      - ./data/db5:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
