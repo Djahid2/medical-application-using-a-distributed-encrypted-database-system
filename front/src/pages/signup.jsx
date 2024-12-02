@@ -9,7 +9,11 @@ export default function Signup() {
         name:'',
         email:'',
         pass:'',
-        passr:''
+        passr:'',
+        passdelete:'',
+        passdeleter:'',
+        passadd:'',
+        passaddr:'',
     }
     function reducer(newUser , action) {
         if (action.type === 'newUser') {
@@ -77,6 +81,16 @@ export default function Signup() {
                             <input value={newUser.pass} onChange={handlChange} type="password" id="pass" placeholder="password..." />
                             <label htmlFor="passr">confirm password</label>
                             <input value={newUser.passr} onChange={handlChange} id='passr' type="password" placeholder="confirm password..." />
+                            {/* ################ 1dec */}
+                            <label htmlFor="passr">deletion password</label>
+                            <input value={newUser.passdelete} onChange={handlChange} id='passdelete' type="password" placeholder="deletion password..." />
+                            <label htmlFor="passr">confirm deletion password</label>
+                            <input value={newUser.passdeleter} onChange={handlChange} id='passdeleter' type="password" placeholder="confirm deletion password..." />
+                            <label htmlFor="passr">addition password</label>
+                            <input value={newUser.passadd} onChange={handlChange} id='passadd' type="password" placeholder="deletion password..." />
+                            <label htmlFor="passr">confirm addtion password</label>
+                            <input value={newUser.passaddr} onChange={handlChange} id='passaddr' type="password" placeholder="confirm addition password..." />
+                            {/* ################ */}
                             <button style={{minHeight:'46px'}} type="submit">{isWaiting ? <span className="loader"></span> : 'Login'} </button>
 
                         </form>

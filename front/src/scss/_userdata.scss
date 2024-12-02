@@ -1,5 +1,117 @@
 .userdata {
     padding: 40px 15px;
+    .passwordReq {
+        width: 500px;
+        transition: 0.5s;
+        // height: 150px;
+        background-color: red;
+        position: fixed;
+        left: 50%;
+        top: -100%;
+        // top: 50px;
+        border: 2px solid var(--t);
+        &.active {
+            top: 50px;
+        }
+        transform: translateX(-50%);
+        z-index: 10;
+        background-color: beige;
+        border-radius: 40px  0 40px 40px;
+        padding: 20px;
+        text-align: center;
+        button {
+            display: block;
+            margin: 20px ;
+            margin-bottom: 0;
+            transition: 0.4s;
+            border-radius: 50px;
+            border: 2px solid transparent;
+            padding: 12px 20px;
+            color: white;
+            background-color: var(--t);
+            cursor: pointer;
+            width: 160px;
+            margin-left: auto;
+            text-transform: capitalize;
+            margin-right: auto;
+            &:hover {
+                color: var(--t);
+                background-color: white;
+                border-color: var(--color-one);
+            }
+        }
+        p {
+            
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--t);
+            text-transform: capitalize;
+            width: fit-content;
+            margin: 0 auto 35px;
+            position: relative;
+            &::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: -15px;
+                width: 100%;
+                height: 2px;
+                background-color: var(--t);
+
+            }
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                background-color: var(--t);
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: -21px;
+            }
+        }
+        
+        i {
+            position: absolute;
+            right: -17px;
+            top: -17px;
+            width: 37px;
+            height: 37px;
+            border-radius: 50%;
+            color: beige;
+            cursor: pointer;
+            background-color: var(--t);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.4s;
+            &:hover {
+                color: var(--t);
+                background-color: white;
+                border-color: var(--color-one);
+            }
+        }
+        input {
+            padding: 8px 20px;
+            border: 2px solid var(--color-two);
+            border-radius: 16px;
+            transition: 0.3s;
+            color: var(--t);
+            max-width: 100%;
+            &:focus {
+                outline: none;
+                border-color: var(--color-one);
+                    }
+            &::placeholder {
+                font-weight: 500;
+                text-transform: capitalize;
+
+            }
+        }
+    }
     .moreinfo {
         transition: 0.4s;
         padding: 40px 20px;
@@ -45,11 +157,78 @@
         .intro {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            // justify-content: space-between;
             flex-basis: 30%;
             position: relative;
-            
-            button {
+            .contacts {
+                // margin-top: -350px;
+
+                // .adding {
+                //     margin-top: 20px;
+                //     display: flex;
+                //     align-items: center;
+                //     justify-self: flex-start;
+                //     input {
+                //         padding: 8px 20px;
+                //         border: 2px solid var(--color-two);
+                //         border-top-left-radius: 16px;
+                //         border-bottom-left-radius: 16px;
+                //         transition: 0.3s;
+                //         color: var(--t);
+                //         &:focus {
+                //             outline: none;
+                //             border-color: var(--color-one);
+                //         }
+                //         &::placeholder {
+                //             font-weight: 500;
+                //             text-transform: capitalize;
+                //         }
+                //     }
+                //     button {
+                //         padding: 8px 15px;
+                //         text-transform: capitalize;
+                //         border: 2px solid var(--color-two);
+                //         background-color: var(--t);
+                //         color: beige;
+                //         border-left: none;
+                //         border-top-right-radius: 16px;
+                //         border-bottom-right-radius: 16px;
+                //         cursor: pointer;
+                //     }
+                // }
+                .showcontacts {
+                    margin-top: 20px;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    input {
+                        padding: 8px 20px;
+                        border: 2px solid var(--color-two);
+                        border-radius: 16px;
+                        transition: 0.3s;
+                        color: var(--t);
+                        max-width: 90%;
+                        &:focus {
+                            outline: none;
+                            border-color: var(--color-one);
+                                }
+                        &::placeholder {
+                            font-weight: 500;
+                            text-transform: capitalize;
+
+                        }
+                    }
+                    label {
+                        font-weight: 500;
+                        text-transform: capitalize;
+                        margin-left: 10px;
+                    }
+                }
+                
+            }
+            button.addmodfie {
+                margin-top: auto;
                 transition: 0.4s;
                 border-radius: 50px;
                 border: 2px solid transparent;
