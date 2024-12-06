@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // Schéma pour les tentatives de connexion échouées
 const failedLoginAttemptSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'User', // Assurez-vous que vous avez un modèle 'User' dans Mongoose
     required: true,
     unique: true

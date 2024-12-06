@@ -17,10 +17,10 @@ export default function Signup() {
         email:'',
         pass:'',
         passr:'',
-        passdelete:'',
-        passdeleter:'',
-        passadd:'',
-        passaddr:'',
+        passmanager:'',
+        passmanagerr:'',
+        passEditor:'',
+        passEditorr:'',
     }
     function reducer(newUser , action) {
         if (action.type === 'newUser') {
@@ -99,9 +99,14 @@ export default function Signup() {
                     } else if (newUser.pass !== newUser.passr) { 
                             setHaserror(true)
                             setMerror('The two password are not the same')
-                    } else {
-                        // this palace is for the request api
+                    } else if(newUser.passEditor !== newUser.passEditorr)  {
+                        setHaserror(true)
+                        setMerror('The two password Editor  are not the same')
+                     // this palace is for the request api
                         console.log(newUser)
+                    }else if(newUser.passmanager!== newUser.passmanagerr) {
+                        setHaserror(true)
+                        setMerror('The two password manager  are not the same')
                     }
                     
                     if (haserror) {
@@ -119,7 +124,9 @@ function handSubmit(e){
         axios.post('http://localhost:5000/auth/register',{
             username:newUser.name,
             email:newUser.email,
-            password:newUser.pass
+            password:newUser.pass,
+            passEditor:newUser.passEditor,
+            passManager:newUser.passmanager
         }).then(response => {
             setStep(2)
             console.log(response.data)
@@ -180,14 +187,14 @@ function handSubmit2(e){
                             <label htmlFor="passr">confirm password</label>
                             <input value={newUser.passr} onChange={handlChange} id='passr' type="password" placeholder="confirm password..." />
                             {/* ################ 1dec */}
-                            <label htmlFor="passr">deletion password</label>
-                            <input value={newUser.passdelete} onChange={handlChange} id='passdelete' type="password" placeholder="deletion password..." />
-                            <label htmlFor="passr">confirm deletion password</label>
-                            <input value={newUser.passdeleter} onChange={handlChange} id='passdeleter' type="password" placeholder="confirm deletion password..." />
-                            <label htmlFor="passr">addition password</label>
-                            <input value={newUser.passadd} onChange={handlChange} id='passadd' type="password" placeholder="deletion password..." />
-                            <label htmlFor="passr">confirm addtion password</label>
-                            <input value={newUser.passaddr} onChange={handlChange} id='passaddr' type="password" placeholder="confirm addition password..." />
+                            <label htmlFor="passr">Manager  Password</label>
+                            <input value={newUser.passmanager} onChange={handlChange} id='passmanager' type="password" placeholder=" Manager Password..." />
+                            <label htmlFor="passr">confirm Manager  Password</label>
+                            <input value={newUser.passmanagerr} onChange={handlChange} id='passmanagerr' type="password" placeholder="confirm Manager  Password..." />
+                            <label htmlFor="passr">Editor Password </label>
+                            <input value={newUser.passEditor} onChange={handlChange} id='passEditor' type="password" placeholder="Editor Password..." />
+                            <label htmlFor="passr">confirm Editor Password</label>
+                            <input value={newUser.passEditorr} onChange={handlChange} id='passEditorr' type="password" placeholder="confirm Editor Password..." />
                             {/* ################ */}
                             <button style={{minHeight:'46px'}} type="submit">{isWaiting ? <span className="loader"></span> : 'Login'} </button>
                         </form>

@@ -69,7 +69,7 @@ exports.addUser = async (data) => {
 };
 
 
-async function handleLoginAttempt(userId, isLoginSuccessful) {
+exports.handleLoginAttempt = async (userId, isLoginSuccessful) => {
   
   let failedAttempt = await FailedLoginAttempt.findOne({ user: userId });
  
@@ -109,4 +109,3 @@ async function handleLoginAttempt(userId, isLoginSuccessful) {
   }
 }
 
-module.exports = { handleLoginAttempt };
