@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const Key = require("../crypto/modules/key");
 
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
@@ -41,7 +42,7 @@ function distributeRandomly(data) {
 }
 
 async function getMaxMatricule() {
-  let maxMatricule = 20241631000; // Default starting matricule
+  let maxMatricule = 20241631000; 
 
   for (const uri of NODE_URIS) {
     const client = new MongoClient(uri);
@@ -70,9 +71,9 @@ async function getMaxMatricule() {
 async function distributeData(data) {
   const maxMatricule = await getMaxMatricule(); // Get the current max matricule
   const newMatricule = maxMatricule + 1; // Calculate the new matricule
-  const newId = newMatricule + 10000; // Generate the new ID
+  const HashedId = Key.hmacSHA256(newMatricule.toString()).toString("hex"); 
   const newData = { ...data, patient_matricule: newMatricule.toString() };
-
+ 
   const distributedData = distributeRandomly(newData);
   for (let i = 0; i < NODE_URIS.length; i++) {
     const client = new MongoClient(NODE_URIS[i]);
@@ -80,7 +81,7 @@ async function distributeData(data) {
       await client.connect();
       const db = client.db();
       const collection = db.collection("dossier_medical");
-      distributedData[i]._id = newId.toString();
+      distributedData[i]._id = HashedId;
       await collection.insertOne(distributedData[i]);
     } finally {
       await client.close();
