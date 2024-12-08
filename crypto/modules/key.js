@@ -64,7 +64,7 @@ Key.generateKey = function (password, salt, iterations = 1000, keySize = 32) {
   return Key.pbkdf2(password, salt, iterations, keySize);
 }
 
-if (typeof module != 'undefined' && module.exports) module.exports = Key; // CommonJs export
+if (typeof module != 'undefined' && module.exports) module.exports = Key; 
 
 /**--------------------------------CHIFFREMENT/DECHIFFREMENT------------------------------- */
 
