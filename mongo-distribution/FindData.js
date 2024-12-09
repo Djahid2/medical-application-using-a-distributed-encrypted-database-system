@@ -143,19 +143,9 @@ findKey(20241631030).then(key => {
 });
 */
 
-getLastTenMatricules(1).then(lastFive => {
-  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
-});
-getLastTenMatricules(2).then(lastFive => {
-  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
-});
 getLastTenMatricules(3).then(lastFive => {
   console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
 });
-getLastTenMatricules(4).then(lastFive => {
-  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
-});
-
 
 
 module.exports = {findData,findKey};

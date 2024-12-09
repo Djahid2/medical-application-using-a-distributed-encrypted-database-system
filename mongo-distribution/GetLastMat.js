@@ -58,7 +58,7 @@ async function getLastMatricule() {
   
 async function getLastTenMatricules(number) {
     let matriculeList = [];
-    const offset = (number-1)*5;
+    const offset = (number-1)*10;
     const DecryptedMat = [];
     // Loop through each database URI
     for (const uri of NODE_URIS) {
