@@ -3,7 +3,7 @@ const Key = require("../crypto/modules/key");
 require('../crypto/modules/aesCTR.js'); 
 const Aes = require('../crypto/modules/aes.js');
 const { extract_positions, HideKey } = require('../crypto/modules/extract_positions.js');
-
+const {getLastMatricule} = require('./GetLastMat.js');
 
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
@@ -31,7 +31,7 @@ const sampleDossier = {
 };
 
 function generateRandomKey(length = 9) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789*=&+-";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789*=&+-/";
   return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join("");
 }
 
@@ -52,36 +52,8 @@ function distributeRandomlyWithEncryption(data) {
   return { nodeData, randomKey };
 }
 
-
-async function getMaxMatricule() {
-  let maxMatricule = 20241631000; 
-
-  for (const uri of NODE_URIS) {
-    const client = new MongoClient(uri);
-    try {
-      await client.connect();
-      const db = client.db();
-      const collection = db.collection("dossier_medical");
-
-      const latestDoc = await collection.find().sort({ patient_matricule: -1 }).limit(1).toArray();
-
-      if (latestDoc.length > 0 && latestDoc[0].patient_matricule) {
-        const matricule = parseInt(latestDoc[0].patient_matricule, 10);
-        if (matricule > maxMatricule) {
-          maxMatricule = matricule;
-        }
-      }
-    } finally {
-      await client.close();
-    }
-  }
-
-  return maxMatricule;
-}
-
-
 async function distributeData(data) {
-  const maxMatricule = 20241631029; // Get the current max matricule
+  const maxMatricule = await getLastMatricule(); 
   const newMatricule = maxMatricule + 1; // Calculate the new matricule
   const HashedId = Key.hmacSHA256(newMatricule.toString()).toString("hex"); // Generate the hashed ID
   const newData = { ...data, patient_matricule: newMatricule.toString() }; // Add the matricule to the data

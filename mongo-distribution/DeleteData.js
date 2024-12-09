@@ -41,4 +41,5 @@ async function deleteData(matricule) {
     return totalDeletedCount;
   }
 
-deleteData(20241631020)
+  matricule = 0;
+deleteData(matricule);

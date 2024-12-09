@@ -3,6 +3,8 @@ const Key = require("../crypto/modules/key");
 const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
 require('../crypto/modules/aesCTR.js'); 
 const Aes = require('../crypto/modules/aes.js');
+const {getLastTenMatricules} = require('./GetLastMat.js');
+
 
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
@@ -96,8 +98,64 @@ async function findData(matricule) {
   return data;
 }
 
+async function findKey(matricule) {
+  let data = {};
+  const matriculeHashed = Key.hmacSHA256(matricule.toString()).toString("hex"); 
+  console.log("Hashed matricule:", matriculeHashed);
+  for (const uri of NODE_URIS) {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+      const db = client.db();
+      const collection = db.collection("dossier_medical");
+      const partialData = await collection.findOne({ _id: matriculeHashed });
+      if (partialData) {
+        // Add all fields to the `data` object, including emergency_contact, patient_matricule, and lab_results
+        Object.keys(partialData).forEach(attribute => {
+          if (partialData[attribute]) {
+            data[attribute] = partialData[attribute];
+          }
+        });
+        if (data.emergency_contact && data.patient_matricule && data.lab_results) {
+          console.log("All data found, stopping search.");
+          break;
+        }
+      }
+    } catch (err) {
+      console.error(`Error connecting to ${uri}:`, err.message);
+    } finally {
+      await client.close();
+    }
+  }
+  if (data.emergency_contact && data.patient_matricule && data.lab_results) {
+      const positions = extract_positions(matriculeHashed); 
+      const { modifiedStrings, key } = RevealKey(positions, data.emergency_contact, data.patient_matricule, data.lab_results);
+    return key;    
+  }
+}
+/*
 
-findData(20241631028).then(data => {
+findData(20241631027).then(data => {
   console.log(data); 
 });
+findKey(20241631030).then(key => {
+  console.log(key); 
+});
+*/
 
+getLastTenMatricules(1).then(lastFive => {
+  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
+});
+getLastTenMatricules(2).then(lastFive => {
+  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
+});
+getLastTenMatricules(3).then(lastFive => {
+  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
+});
+getLastTenMatricules(4).then(lastFive => {
+  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
+});
+
+
+
+module.exports = {findData,findKey};
