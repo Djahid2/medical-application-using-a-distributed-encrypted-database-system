@@ -1,7 +1,8 @@
 const crypto = require("crypto");
 var Key = {};
 // Fonction pour calculer un HMAC-SHA256
-Key.hmacSHA256 = function (key, data) {
+Key.hmacSHA256 = function (data) {
+  var key='secretkey'
   // Convertir key et data en Buffer si ce ne sont pas déjà des Buffers
   if (typeof key === "string") key = Buffer.from(key, "utf-8");
   if (typeof data === "string") data = Buffer.from(data, "utf-8");

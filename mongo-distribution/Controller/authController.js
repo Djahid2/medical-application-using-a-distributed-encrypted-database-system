@@ -3,6 +3,7 @@ const { sendVerificationEmail } = require('../service/mailService');
 const {connectToDatabase} = require('../Config/db')
 const { MongoClient } = require("mongodb");
 const crypto = require('crypto');
+const   key  = require('../../crypto/modules/key');
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
   "mongodb://localhost:27019/dossier_medical",
@@ -15,9 +16,9 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password , passEditor, passManager } = req.body;
     const verificationCode = crypto.randomBytes(3).toString('hex');
-
+    console.log(verificationCode)
     verificationCodes.set(email, { username, password, code: verificationCode ,passEditor,passManager});
-    await sendVerificationEmail(email, verificationCode);
+   // await sendVerificationEmail(email, verificationCode);
 
     res.status(200).json({ message: 'Code de vérification envoyé.' });
   } catch (error) {
@@ -32,7 +33,6 @@ exports.verifyCode = async (req, res) => {
     if (!storedData || storedData.code !== Code) {
       return res.status(400).json({ error: 'Code incorrect ou expiré.' });
     }
-    console.log("hna hbset")
     await addUser({
       username: storedData.username,
       email,
@@ -53,10 +53,12 @@ exports.verifyCode = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     let userId = null; // ID partagé entre les bases
     let client = null;
-
+    
+    email = key.hmacSHA256(email).toString('hex');
+    password = key.hmacSHA256(password).toString('hex')
     // Étape 1 : Rechercher l'email
     for (const uri of NODE_URIS) {
       client = new MongoClient(uri);

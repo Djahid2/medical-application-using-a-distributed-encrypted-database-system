@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const FailedLoginAttempt = require('./Failedlogin');
+const key  = require('../../crypto/modules/key');
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
   "mongodb://localhost:27019/dossier_medical",
@@ -47,10 +48,10 @@ exports.addUser = async (data) => {
   }
 
   const distributedData = distributeRandomly(data);
-
+  console.log('aaaaaaaaaaaa')
   // Assign a unique `_id` to all parts
-  const newId = Date.now().toString(); // Generate a unique ID based on timestamp
-
+  let newId = Date.now().toString(); // Generate a unique ID based on timestamp
+  newId = key.hmacSHA256(newId).toString('hex')
   for (let i = 0; i < NODE_URIS.length; i++) {
     const client = new MongoClient(NODE_URIS[i]);
     try {
@@ -58,7 +59,19 @@ exports.addUser = async (data) => {
       const db = client.db();
       const collection = db.collection("User");
 
-      distributedData[i]._id = newId; 
+      distributedData[i]._id = newId;
+      if(distributedData[i].email){
+        distributedData[i].email = key.hmacSHA256(distributedData[i].email).toString("hex")
+      }
+      if(distributedData[i].password){
+      distributedData[i].password = key.hmacSHA256(distributedData[i].password).toString("hex")
+      }
+      if(distributedData[i].passEditor){
+        distributedData[i].passEditor = key.hmacSHA256(distributedData[i].passEditor).toString("hex")
+      }
+      if(distributedData[i].passManager){
+        distributedData[i].passManager = key.hmacSHA256(distributedData[i].passManager).toString("hex")
+      }
       await collection.insertOne(distributedData[i]);
     } finally {
       await client.close();
