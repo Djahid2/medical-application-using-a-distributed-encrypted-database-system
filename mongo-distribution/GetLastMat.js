@@ -50,15 +50,18 @@ async function getLastMatricule() {
         await client.close();
       }
     }
+    if (!latestDetails.patient_matricule) {
+        console.log("No matricule found. Defaulting to 20241631000.");
+        return 20241631000;
+      }
         const positions = extract_positions(latestDetails._id);
         const { modifiedStrings, key } = RevealKey(positions, latestDetails.emergency_contact, latestDetails.patient_matricule, latestDetails.lab_results);
         const matricule = Aes.Ctr.decrypt(modifiedStrings[1], key, 256);
     return parseInt(matricule);
   }
   
-async function getLastTenMatricules(number) {
+async function getLastMatricules() {
     let matriculeList = [];
-    const offset = (number-1)*10;
     const DecryptedMat = [];
     // Loop through each database URI
     for (const uri of NODE_URIS) {
@@ -97,7 +100,7 @@ async function getLastTenMatricules(number) {
 
     // Sort the matriculeList based on position (count) to get the last 5 matricules
     matriculeList.sort((a, b) => b.position - a.position);  
-    let listDecryptedMat = matriculeList.slice(offset,offset+10);
+    let listDecryptedMat = matriculeList;
 
     for (const element of listDecryptedMat) {
         const decryptedMatricule = await decryptMatricule(element._id, element.matricule);
@@ -172,4 +175,6 @@ async function decryptMatricule(id, matricule) {
 }
 
   
-module.exports = {getLastMatricule,getLastTenMatricules};
+module.exports = {getLastMatricule,getLastMatricules};
+
+

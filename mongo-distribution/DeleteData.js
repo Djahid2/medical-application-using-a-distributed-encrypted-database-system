@@ -41,5 +41,8 @@ async function deleteData(matricule) {
     return totalDeletedCount;
   }
 
-  matricule = 0;
-deleteData(matricule);
+ 
+for (let matricule = 20241631027; matricule <= 20241631047; matricule++) {
+  deleteData(matricule);
+  console.log(`Deleted matricule: ${matricule}`);
+}

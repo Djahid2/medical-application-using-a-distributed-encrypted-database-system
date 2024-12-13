@@ -96,10 +96,15 @@ async function modifyData(matricule, modifiedData) {
 }
   
     
-modifyData(20241631034, {
-  emergency_contact: '{"name":"Amimerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr","relation":"IDK","phone":"055930016"}',
-  symptoms: '[{"symptom":"bosfayer","onset":"2024-05-01"}]',
-  nom_patient: 'Nom Nom Nom Nom',
+modifyData(20241631030, {
+  file_status:"Inactive"
+}).then(modifiedCount => {
+  console.log(`Total modified records: ${modifiedCount}`);
+}).catch(err => {
+  console.error("Error:", err);
+});
+modifyData(20241631029, {
+  file_status:"Inactive"
 }).then(modifiedCount => {
   console.log(`Total modified records: ${modifiedCount}`);
 }).catch(err => {

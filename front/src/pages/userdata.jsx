@@ -34,11 +34,26 @@ export default function UserData() {
         department: "",
         treatment: "",
         notes: "",
-        emergencyContact: {
-            contact1: "",
-            contact2: "",
-            contact3: "",
-        }
+        emergencyContact: 
+        [
+            {
+                nom:"nom",
+                relation:"relation"
+            },
+            {
+                nom:"nom",
+                relation:"relation"
+            },
+            {
+                nom:"nom",
+                relation:"relation"
+            },
+            {
+                nom:"nom",
+                relation:"relation"
+            },
+        ]
+        
     }
     function reducer(valueChageReduce , action) {
         switch(action.type) {

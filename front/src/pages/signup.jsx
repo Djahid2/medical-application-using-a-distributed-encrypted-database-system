@@ -81,7 +81,7 @@ export default function Signup() {
             setetatpass(true)
         }
     };
-    function Verfication() {
+    function  Verfication() {
       
         // console.log(newUser)
         setWaiting(true)
