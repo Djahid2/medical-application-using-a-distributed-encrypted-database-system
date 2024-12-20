@@ -2,7 +2,7 @@ const crypto = require("crypto");
 var Key = {};
 // Fonction pour calculer un HMAC-SHA256
 Key.hmacSHA256 = function (data) {
-  var key='secretkey'
+  var key="secretkey"
   // Convertir key et data en Buffer si ce ne sont pas déjà des Buffers
   if (typeof key === "string") key = Buffer.from(key, "utf-8");
   if (typeof data === "string") data = Buffer.from(data, "utf-8");
@@ -64,7 +64,7 @@ Key.generateKey = function (password, salt, iterations = 1000, keySize = 32) {
   return Key.pbkdf2(password, salt, iterations, keySize);
 }
 
-if (typeof module != 'undefined' && module.exports) module.exports = Key; // CommonJs export
+if (typeof module != 'undefined' && module.exports) module.exports = Key; 
 
 /**--------------------------------CHIFFREMENT/DECHIFFREMENT------------------------------- */
 
@@ -109,6 +109,7 @@ Key.decryptAESWithPBKDF2 = function (encryptedData, password) {
     return decrypted;
   }
 }
+
 
 
 

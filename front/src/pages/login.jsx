@@ -34,19 +34,18 @@ export default function Login() {
     }
     function Verfication() {
         // this palace for the user to enter his espace
-        setWaiting(true)
-        setTimeout(()=>{
             if (!user.email.includes('@')||!allowedDomains.includes(user.email.split('@')[1]) ) {
                 setemailerror(`We are sorry, only emails from the following domains are allowed: ${allowedDomains.map(domain => `@${domain}`).join(', ')}`);
+                return true
             }
-            setWaiting(false)
-        },2000)
+            setemailerror('')
+        return false
     }
 
     function handSubmit0 (e){
         e.preventDefault()
-        Verfication()
-        if(!emailerror ){
+       
+        if(!Verfication()){
             setStep(2)
         }
     }
@@ -59,9 +58,9 @@ export default function Login() {
             password : user.pass
           }).then(response =>{
             console.log(response.data);
-            const info = {pass:true ,data: {name : response.data.username , email:user.email}}
+            const info = {pass:true ,data: {info : response.data.info}}
             userAuth.setAuthor(info)
-            navigate('/user/dashboard', {state : {isP:'yes' , name: response.data.username}})
+            navigate('/user/dashboard', {state : {isP:'yes' , info :response.data.info} })
           }).catch((err) => {
             setStep(1)
             console.log(err)

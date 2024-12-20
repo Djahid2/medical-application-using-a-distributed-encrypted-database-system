@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# MongoDB generated files
+mongo-distribution/data/
+mongo-distribution/data/db1/
+mongo-distribution/data/db2/
+mongo-distribution/data/db3/
+mongo-distribution/data/db4/

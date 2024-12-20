@@ -3,7 +3,9 @@ const { sendVerificationEmail } = require('../service/mailService');
 const {connectToDatabase} = require('../Config/db')
 const { MongoClient } = require("mongodb");
 const crypto = require('crypto');
-const   key  = require('../../crypto/modules/key');
+const Key = require('../../crypto/modules/key');
+const Aes = require('../../crypto/modules/aes');
+require('../../crypto/modules/aesCTR')
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
   "mongodb://localhost:27019/dossier_medical",
@@ -33,16 +35,34 @@ exports.verifyCode = async (req, res) => {
     if (!storedData || storedData.code !== Code) {
       return res.status(400).json({ error: 'Code incorrect ou expiré.' });
     }
+    const email1 = Key.hmacSHA256(email).toString("hex")
+    const username = Key.hmacSHA256(storedData.username).toString("hex")
+    const password = Key.hmacSHA256(storedData.password).toString("hex")
+    const passEditor = Key.hmacSHA256(storedData.passEditor).toString("hex")
+    const passManager = Key.hmacSHA256(storedData.passManager).toString("hex")
+
     await addUser({
-      username: storedData.username,
-      email,
-      password: storedData.password,
-      passEditor: storedData.passEditor,
-      passManager: storedData.passManager
+      username: username,
+      email : email1,
+      password: password,
+      passEditor: passEditor,
+      passManager: passManager
     });
 
     verificationCodes.delete(email);
-    res.status(200).json({ message: 'Utilisateur créé avec succès !' });
+    const account = {
+      email : email,
+      username : storedData.username
+    }
+    const accountString = JSON.stringify(account);
+    const cles = crypto.randomBytes(5).toString("hex").slice(0, 9);
+    let  info = Aes.Ctr.encrypt(accountString,cles,256)
+    // Mélanger la clé dans `info` à la position 4
+    const position = 4; // Position après laquelle insérer la clé
+    const mixedInfo = info.slice(0, position) + cles + info.slice(position);
+
+
+    res.status(200).json({ message: 'Utilisateur créé avec succès !' ,info : mixedInfo});
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -57,8 +77,8 @@ exports.login = async (req, res) => {
     let userId = null; // ID partagé entre les bases
     let client = null;
     
-    email = key.hmacSHA256(email).toString('hex');
-    password = key.hmacSHA256(password).toString('hex')
+    email = Key.hmacSHA256(email).toString('hex');
+    password = Key.hmacSHA256(password).toString('hex')
     // Étape 1 : Rechercher l'email
     for (const uri of NODE_URIS) {
       client = new MongoClient(uri);
@@ -129,9 +149,19 @@ exports.login = async (req, res) => {
     if (!username) {
       return res.status(400).json({ error: "Username not found for this account" });
     }
+    const account = {
+      email : email,
+      username : username
+    }
+    const accountString = JSON.stringify(account);
+    const cles = crypto.randomBytes(5).toString("hex").slice(0, 9);
+    let  info = Aes.Ctr.encrypt(accountString,cles,256)
+    // Mélanger la clé dans `info` à la position 4
+    const position = 4; // Position après laquelle insérer la clé
+    const mixedInfo = info.slice(0, position) + cles + info.slice(position);
 
     if (client) await client.close();
-    res.status(200).json({ message: "Login successful", username });
+    res.status(200).json({ message: "Login successful", info : mixedInfo });
 
   } catch (err) {
     console.error(err.message);

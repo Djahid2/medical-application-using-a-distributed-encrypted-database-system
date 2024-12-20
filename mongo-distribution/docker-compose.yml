@@ -44,3 +44,17 @@ services:
     volumes:
       - ./data/db5:/data/db
     command: ["mongod", "--port", "27017", "--dbpath", "/data/db", "--logpath", "/data/db/mongo.log", "--bind_ip", "0.0.0.0"]
+  node:
+    image: node:latest
+    container_name: node_app
+    ports:
+      - "5000:5000"
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: ["node", "AddUser.js"]
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://Host:27017 
+    depends_on:
+      - db1

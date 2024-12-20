@@ -2,6 +2,9 @@ import photo from '../photos/avatr-3.jpg'
 import { User } from '../context/userContent'
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+
+
 export default function Profile() {
     const user = useContext(User)
     const navigate = useNavigate()
@@ -19,7 +22,9 @@ export default function Profile() {
                     <img src={photo} alt="photo" />
                 </div>
                 <div className="right">
-                    <h3> FirstName LastName </h3>
+          
+                        <h3>Firstname Lastname</h3>
+                   
                     <p>email : testingEmail@gamil.com</p>
                 </div>
             </div>

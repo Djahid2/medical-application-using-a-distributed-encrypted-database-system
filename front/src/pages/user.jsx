@@ -6,11 +6,11 @@ export default function Userpage() {
     const navigate = useNavigate()
     console.log(data.author)
     useEffect(()=> {
-        if (!data.author.pass) {
+       /* if (!data.author.pass) {
             navigate('/')
         } else {
 
-        }
+        }*/
     },[])
     return (
         <div className="userpage">

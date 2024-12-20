@@ -1,9 +1,13 @@
-import {useReducer , useState } from "react"
+import {useReducer , useState,useContext } from "react"
 import { NavLink } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import v from '../photos/lading.mp4'
 import axios from 'axios';
+import { User } from "../context/userContent";
 
 export default function Signup() {
+    const userAuth = useContext(User)
+    const navigate = useNavigate()
     const [haserror , setHaserror] = useState(false)
     const [merror , setMerror] = useState('')
     const [isWaiting , setWaiting] = useState(false)
@@ -146,6 +150,9 @@ function handSubmit2(e){
         }).then(response => {
             setWaiting(false)
             console.log("Response:", response.data);
+            const info = {pass:true ,data: {info : response.data.info}}
+            userAuth.setAuthor(info)
+            navigate('/user/dashboard', {state : {isP:'yes' , info :response.data.info} })
         }).catch((error) => {
 
             console.log(error)
