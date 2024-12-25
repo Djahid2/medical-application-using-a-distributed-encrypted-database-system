@@ -29,7 +29,7 @@ export default function Nav() {
                                 <li>Home</li>
                             </NavLink>
                             <NavLink to='/work'>
-                                <li>Who It Work</li>
+                                <li>How It Works</li>
                             </NavLink>
                             <NavLink to='/about'>
                                 <li>About</li>
