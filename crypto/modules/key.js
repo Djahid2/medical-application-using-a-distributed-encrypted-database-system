@@ -20,8 +20,8 @@ Key.sha256 = function (data) {
 };
 
 // Fonction manuelle HMAC-SHA256
-Key.hmacSHA256 = function (key, data) {
-  if (typeof key === "string") key = new TextEncoder().encode(key);
+Key.hmacSHA256 = function (data) {
+  const key= "secretkey" ;
   if (typeof data === "string") data = new TextEncoder().encode(data);
 
   const blockSize = 64; // Taille du bloc pour SHA-256
@@ -52,54 +52,10 @@ Key.hmacSHA256 = function (key, data) {
   const innerHash = Key.sha256(new Uint8Array([...iKeyPad, ...data]));
   const hmac = Key.sha256(new Uint8Array([...oKeyPad, ...innerHash]));
 
-  return hmac;
+  return Array.from(hmac).map(byte => byte.toString(16).padStart(2, "0")).join("");
 };
 
-// Exemple d'utilisation
-const key = "my-secure-password";
-const message = "Hello";
-
-const hmacResult = Key.hmacSHA256(key, message);
-
-console.log("HMAC-SHA256 (hex):", Array.from(hmacResult).map(byte => byte.toString(16).padStart(2, "0")).join(""));
 /*
-
-// Fonction manuelle HMAC-SHA256
-Key.hmacSHA256 = function(data, key = 'secretkey') {
-  if (typeof key === 'string') key = Buffer.from(key, 'utf-8');
-  if (typeof data === 'string') data = Buffer.from(data, 'utf-8');
-
-  const blockSize = 64; // Block size for SHA-256
-  let paddedKey = key;
-
-  // If the key is longer than the block size, hash it
-  if (key.length > blockSize) {
-    paddedKey = Key.sha256(key);
-  }
-
-  // Pad the key to the block size
-  if (paddedKey.length < blockSize) {
-    const temp = Buffer.alloc(blockSize);
-    paddedKey.copy(temp);
-    paddedKey = temp;
-  }
-
-  // Calculate the paddings
-  const oKeyPad = Buffer.alloc(blockSize);
-  const iKeyPad = Buffer.alloc(blockSize);
-
-  for (let i = 0; i < blockSize; i++) {
-    oKeyPad[i] = paddedKey[i] ^ 0x5c;
-    iKeyPad[i] = paddedKey[i] ^ 0x36;
-  }
-  // HMAC-SHA256
-  const innerHash = Key.sha256(Buffer.concat([iKeyPad, data]));
-  const hmac = Key.sha256(Buffer.concat([oKeyPad, innerHash]));
-  console.log(hmac.toString('hex'));
-  return hmac.toString('hex'); // Return as hexadecimal string
-};
-
-*/
 
 
 const crypto = require("crypto");
@@ -162,7 +118,6 @@ Key.pbkdf2 = function (password, salt, iterations, keyLength) {
 
   return derivedKey.slice(0, keyLength);
 }
-module.exports =  Key ;
 
 
 // Fonction pour générer une clé à partir d'un mot de passe
@@ -217,4 +172,5 @@ Key.decryptAESWithPBKDF2 = function (encryptedData, password) {
 }
 
 */
+module.exports =  Key ;
 
