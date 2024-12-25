@@ -18,6 +18,50 @@ Key.sha256 = function (data) {
   const result = new Uint8Array(hash.buffer);
   return result;
 };
+
+// Fonction manuelle HMAC-SHA256
+Key.hmacSHA256 = function (key, data) {
+  if (typeof key === "string") key = new TextEncoder().encode(key);
+  if (typeof data === "string") data = new TextEncoder().encode(data);
+
+  const blockSize = 64; // Taille du bloc pour SHA-256
+  let paddedKey = key;
+
+  // Si la clé est plus grande que le bloc, la hacher
+  if (key.length > blockSize) {
+    paddedKey = Key.sha256(key);
+  }
+
+  // Compléter la clé pour atteindre la taille de 64 octets
+  if (paddedKey.length < blockSize) {
+    const temp = new Uint8Array(blockSize);
+    temp.set(paddedKey);
+    paddedKey = temp;
+  }
+
+  // Calculer les paddings
+  const oKeyPad = new Uint8Array(blockSize);
+  const iKeyPad = new Uint8Array(blockSize);
+
+  for (let i = 0; i < blockSize; i++) {
+    oKeyPad[i] = paddedKey[i] ^ 0x5c;
+    iKeyPad[i] = paddedKey[i] ^ 0x36;
+  }
+
+  // HMAC-SHA256
+  const innerHash = Key.sha256(new Uint8Array([...iKeyPad, ...data]));
+  const hmac = Key.sha256(new Uint8Array([...oKeyPad, ...innerHash]));
+
+  return hmac;
+};
+
+// Exemple d'utilisation
+const key = "my-secure-password";
+const message = "Hello";
+
+const hmacResult = Key.hmacSHA256(key, message);
+
+console.log("HMAC-SHA256 (hex):", Array.from(hmacResult).map(byte => byte.toString(16).padStart(2, "0")).join(""));
 /*
 
 // Fonction manuelle HMAC-SHA256
