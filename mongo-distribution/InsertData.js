@@ -2,7 +2,7 @@ const { MongoClient } = require("mongodb");
 const Key = require("../crypto/modules/key");
 require('../crypto/modules/aesCTR.js'); 
 const Aes = require('../crypto/modules/aes.js');
-const { extract_positions, HideKey } = require('../crypto/modules/extract_positions.js');
+const { extract_positions, HideKey,generateRandomKey } = require('../crypto/modules/extract_positions.js');
 const {getLastMatricule} = require('./GetLastMat.js');
 
 const NODE_URIS = [
@@ -14,10 +14,10 @@ const NODE_URIS = [
 
 const sampleDossier = {
   file_status: "active",
-  emergency_contact: JSON.stringify({ name: "John Doe", relation: "Brother", phone: "123-456-7890" }),
+  emergency_contact: JSON.stringify([{ name: "John Doe", relation: "Brother", phone: "123-456-7890" }]),
   insurance_details: JSON.stringify({ provider: "HealthCare Inc.", policy_number: "POL123456" }),
   medical_history: JSON.stringify([{ illness: "Hypertension", date: "2021-05-10" }]),
-  diagnoses: JSON.stringify([{ diagnosis: "Diabetes", severity: "Moderate", date: "2021-06-15" }]), //
+  diagnoses: JSON.stringify([{ diagnosis: "Diabetes", severity: "Moderate", date: "2021-06-15" }]), 
   allergies: "Peanuts, Shellfish",
   medications: JSON.stringify([{ name: "Metformin", dosage: "500mg", frequency: "twice daily" }]),
   treatments: JSON.stringify([{ type: "Physiotherapy", date: "2021-07-01", notes: "Weekly sessions" }]),
@@ -25,15 +25,12 @@ const sampleDossier = {
   doctor_notes: "Patient is responding well to treatment.",
   symptoms: JSON.stringify([{ symptom: "Fatigue", onset: "2021-05-01" }]),
   vital_signs: JSON.stringify({ blood_pressure: "120/80", temperature: "98.6F" }),
-  next_appointment_date: "2021-08-15T09:30:00Z", //
+  next_appointment_date: "2021-08-15T09:30:00Z", 
   date_naissance_patient: "2000-06-10",
-  nom_patient:"Nom Prenom", //
+  nom_patient:"Nom Prenom", 
 };
 
-function generateRandomKey(length = 9) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789*=&+-/";
-  return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join("");
-}
+
 
 function distributeRandomlyWithEncryption(data) {
   const keys = Object.keys(data);
@@ -138,8 +135,14 @@ async function distributeData(data) {
 
 
 async function main() {
+  let i = 0;
+  while (i<=35){
   await distributeData(sampleDossier);
   console.log("Data distribution complete!");
+    i++;
+}
 }
 
-main().catch(console.error);
+//main().catch(console.error);
+
+module.exports = {distributeData}

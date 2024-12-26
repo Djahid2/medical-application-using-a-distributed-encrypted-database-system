@@ -73,11 +73,11 @@ exports.verifyCode = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    let { username ,  password } = req.body;
     let userId = null; // ID partagé entre les bases
     let client = null;
-    
-    email = Key.hmacSHA256(email).toString('hex');
+    console.log("username",username)
+    username = Key.hmacSHA256(username).toString('hex');
     password = Key.hmacSHA256(password).toString('hex')
     // Étape 1 : Rechercher l'email
     for (const uri of NODE_URIS) {
@@ -86,7 +86,7 @@ exports.login = async (req, res) => {
       const db = client.db();
       const collection = db.collection("User");
 
-      const user = await collection.findOne({ email });
+      const user = await collection.findOne({ username });
       if (user) {
         userId = user._id; // Conserver l'ID tel qu'il est
         break;
@@ -95,7 +95,7 @@ exports.login = async (req, res) => {
     }
 
     if (!userId) {
-      return res.status(400).json({ error: "Account does not exist" });
+      return res.status(400).json({ error: "Username not found " });
     }
 
     // Étape 2 : Rechercher le mot de passe dans une autre base
@@ -130,7 +130,7 @@ exports.login = async (req, res) => {
     await handleLoginAttempt(userId, true);
 
     // Étape 4 : Rechercher le `username` dans une autre base
-    let username = null;
+    let email = null;
     for (const uri of NODE_URIS) {
       client = new MongoClient(uri);
       await client.connect();
@@ -138,16 +138,16 @@ exports.login = async (req, res) => {
       const collection = db.collection("User");
       console.log(uri)
       const user = await collection.findOne({ _id: userId });
-      if (user.username) {
-        username = user.username;
+      if (user.email) {
+        email = user.email;
         break;
       }
       await client.close();
     }
 
     console.log(username)
-    if (!username) {
-      return res.status(400).json({ error: "Username not found for this account" });
+    if (!email) {
+      return res.status(400).json({ error: "Account does not exist" });
     }
     const account = {
       email : email,
@@ -168,3 +168,62 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+exports.VerfAdmin = async (req,res) =>{
+  try{
+   let passEditor = req.body.passEditor
+   let user = req.body.user
+  const extractedKey = user.slice(4, 4 + 9);
+        const originalEncryptedInfo = user.slice(0, 4) + user.slice( 4 + 9);
+        const decryptedInfo =  Aes.Ctr.decrypt(originalEncryptedInfo, extractedKey,256);
+        console.log(decryptedInfo)
+        let email = decryptedInfo.email
+        passEditor = Key.hmacSHA256(passEditor).toString('hex');
+        let userId = null; // ID partagé entre les bases
+        let client = null;
+        // Étape 1 : Rechercher l'email
+            for (const uri of NODE_URIS) {
+              client = new MongoClient(uri);
+              await client.connect();
+              const db = client.db();
+              const collection = db.collection("User");
+        
+              const user = await collection.findOne({ email });
+              if (user) {
+                userId = user._id; // Conserver l'ID tel qu'il est
+                break;
+              }
+              await client.close(); // Fermer la connexion si aucun utilisateur trouvé
+            }
+        
+            if (!userId) {
+              return res.status(400).json({ error: "Account does not exist" });
+            }
+            let userPassword = null;
+                for (const uri of NODE_URIS) {
+                  client = new MongoClient(uri);
+                  await client.connect();
+                  const db = client.db();
+                  const collection = db.collection("User");
+                  const user = await collection.findOne({ _id: userId });
+                  if (user.passEditor) {
+                    userPassword = user.passEditor;
+                    break;
+                  }
+                  await client.close();
+                }
+                
+                if (!userPassword) {
+                  return res.status(400).json({ error: "Password not found for this account" });
+                }
+  
+                if(userPassword !== passEditor){
+                  return res.status(400).json({ error: "Password is incorrect" });
+                }
+                return res.status(200).json({message : 'password correct'}) 
+
+  }catch(err){
+     return res.status(400).json({error : err.message})
+  }
+}

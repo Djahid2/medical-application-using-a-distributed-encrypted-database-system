@@ -44,22 +44,23 @@ export default function Login() {
 
     function handSubmit0 (e){
         e.preventDefault()
-       
-        if(!Verfication()){
+        setStep(2)
+        /*if(!Verfication()){
             setStep(2)
-        }
+        }*/
     }
     function  handSubmit(e){
         e.preventDefault()
         
         if(isCaptchaValid){
           axios.post('http://localhost:5000/auth/login',{
-            email : user.email,
+            username : user.email, //username  
             password : user.pass
           }).then(response =>{
             console.log(response.data);
             const info = {pass:true ,data: {info : response.data.info}}
             userAuth.setAuthor(info)
+            localStorage.setItem('userAuth', JSON.stringify(info));
             navigate('/user/dashboard', {state : {isP:'yes' , info :response.data.info} })
           }).catch((err) => {
             setStep(1)
@@ -91,8 +92,8 @@ export default function Login() {
                         <p className="text">You can enter your account from here , just enter your information</p>
                      {step == 1 ? 
                         <form onSubmit={handSubmit0}>
-                            <label htmlFor="email">Your Email</label>
-                            <input value={user.email} onChange={handlChange} id="email" type="text" placeholder="Email..." />
+                            <label htmlFor="email">Your Username</label>
+                            <input value={user.email} onChange={handlChange} id="email" type="text" placeholder="username..." />
                             {emailerror? <p className="errore">{emailerror}</p> : null }
                             <label htmlFor="pass">Enter A Password</label>
                             <input value={user.pass} onChange={handlChange} type="password" id="pass" placeholder="password..." />

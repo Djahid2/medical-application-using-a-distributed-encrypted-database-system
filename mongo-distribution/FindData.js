@@ -3,7 +3,7 @@ const Key = require("../crypto/modules/key");
 const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
 require('../crypto/modules/aesCTR.js'); 
 const Aes = require('../crypto/modules/aes.js');
-const {getLastTenMatricules} = require('./GetLastMat.js');
+const {getLastMatricules} = require('./GetLastMat.js');
 
 
 const NODE_URIS = [
@@ -16,14 +16,14 @@ const NODE_URIS = [
 async function findData(matricule) {
   let data = {};
   const matriculeHashed = Key.hmacSHA256(matricule.toString()).toString("hex"); // Hash the matricule
-  console.log("Searching for matricule:", matricule);
-  console.log("Hashed matricule:", matriculeHashed);
+  //console.log("Searching for matricule:", matricule);
+  //console.log("Hashed matricule:", matriculeHashed);
 
   // Iterate through each MongoDB URI (node)
   for (const uri of NODE_URIS) {
     const client = new MongoClient(uri);
     try {
-      console.log(`Connecting to MongoDB URI: ${uri}`);
+      //console.log(`Connecting to MongoDB URI: ${uri}`);
       await client.connect();
       const db = client.db();
       const collection = db.collection("dossier_medical");
@@ -39,12 +39,7 @@ async function findData(matricule) {
             data[attribute] = partialData[attribute];
           }
         });
-        
-        // Once all fields are found, no need to continue searching
-        if (data.emergency_contact && data.patient_matricule && data.lab_results) {
-          console.log("All data found, stopping search.");
-          break;
-        }
+                
       }
     } catch (err) {
       console.error(`Error connecting to ${uri}:`, err.message);
@@ -55,7 +50,7 @@ async function findData(matricule) {
 
   // If all fields are found, proceed to reveal key and decrypt the data
   if (data.emergency_contact && data.patient_matricule && data.lab_results) {
-      console.log("All required data found:", data);
+      //console.log("All required data found:", data);
 
       // Assuming positions are extracted from the hashed matricule
       const positions = extract_positions(matriculeHashed); // Extract positions from the hashed matricule
@@ -63,7 +58,7 @@ async function findData(matricule) {
       // Use RevealKey to reveal the key from the three fields (strings)
       const { modifiedStrings, key } = RevealKey(positions, data.emergency_contact, data.patient_matricule, data.lab_results);
       //console.log("Modified strings:", modifiedStrings);
-      console.log("Revealed key:", key);
+      //console.log("Revealed key:", key);
 
       // Now decrypt each of the modified strings using the extracted key (assuming AES CTR)
       const decryptedStrings = modifiedStrings.map(modifiedString => {
@@ -101,7 +96,7 @@ async function findData(matricule) {
 async function findKey(matricule) {
   let data = {};
   const matriculeHashed = Key.hmacSHA256(matricule.toString()).toString("hex"); 
-  console.log("Hashed matricule:", matriculeHashed);
+  //console.log("Hashed matricule:", matriculeHashed);
   for (const uri of NODE_URIS) {
     const client = new MongoClient(uri);
     try {
@@ -133,19 +128,71 @@ async function findKey(matricule) {
     return key;    
   }
 }
-/*
 
-findData(20241631027).then(data => {
+async function getLatestData(matricules) {
+  // Use Promise.all to wait for all async operations
+  const dataList = await Promise.all(
+    matricules.map(async (matricule) => {
+      console.log(`Fetching data for matricule: ${matricule}`);
+      
+      try {
+        // Fetch the data for the current matricule
+        let data = await findData(matricule);
+
+        // Check if data is valid and process diagnosis field
+        const diagnosisList = data.diagnoses
+          ? JSON.parse(data.diagnoses).map((d) => d.diagnosis) // Parse JSON and extract diagnoses
+          : undefined;
+
+        // Return formatted data
+        return {
+          matricule: data.patient_matricule || matricule, // Default to matricule if undefined
+          nom_patient: data.nom_patient || 'N/A', // Handle undefined patient name
+          next_appointment_date: data.next_appointment_date || 'N/A', // Default date
+          diagnosis: diagnosisList, // Processed diagnosis data
+          etat: data.file_status || 'unknown', // Default status
+        };
+      } catch (error) {
+        console.error(`Error fetching data for matricule: ${matricule}`, error);
+        // Handle errors gracefully
+        return {
+          matricule,
+          nom_patient: 'N/A',
+          next_appointment_date: 'N/A',
+          diagnosis: undefined,
+          etat: 'error',
+        };
+      }
+    })
+  );
+
+  return dataList;
+}
+
+
+/*findData(20241631029).then(data => {
   console.log(data); 
 });
+
+
 findKey(20241631030).then(key => {
   console.log(key); 
+});*/
+
+
+/*getLastMatricules(1).then(lastFive => {
+  console.log(lastFive); 
+  console.log(getLatestData(lastFive));// Array of the last 5 matricules with their decrypted data
 });
+
+(async () => {
+  const matricules = await getLastMatricules();
+  console.log(matricules)
+  const data = await getLatestData(matricules);
+  console.log("Fetched data:", data);
+})();
 */
 
-getLastTenMatricules(3).then(lastFive => {
-  console.log(lastFive);  // Array of the last 5 matricules with their decrypted data
-});
 
+module.exports = {findData,findKey,getLatestData};
 
-module.exports = {findData,findKey};

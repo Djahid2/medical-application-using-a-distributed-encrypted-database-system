@@ -63,11 +63,18 @@ function RevealKey(positions, string1, string2, string3) {
     };
 }
 
+function generateRandomKey(length = 9) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789*=&+-/";
+    return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join("");
+  }
+
 if (typeof module != 'undefined' && module.exports){
 
     module.exports = {
         extract_positions: extract_positions,
         HideKey: HideKey,
-        RevealKey: RevealKey
+        RevealKey: RevealKey,
+        generateRandomKey:generateRandomKey,
       };
 }
+

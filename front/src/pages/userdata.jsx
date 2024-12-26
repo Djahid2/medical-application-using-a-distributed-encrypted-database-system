@@ -1,43 +1,86 @@
 import { useContext, useEffect, useState ,useRef, useReducer } from "react";
-import { User } from "../context/userContent";
+//import { User } from "../context/userContent";
 // import info from '../context/patient_schedule.json'
 import {  useOnClickOutside } from "usehooks-ts";
 import { type } from "@testing-library/user-event/dist/type";
+import axios from 'axios';
 export default function UserData() {
     // {data.author.data.name}
+    
     // #####################################################################################
-    const data = useContext(User);
+   
  
     // //////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////
     let initFilter = {
         nextappointmentDate:"",
         patientName:"",
-        matricule:"",
+        patientMatricule:"",
+        diagnosis: "",
+        etat: "",
+        searchResults: [],
     }
                         // filter
-    function reducerFitler(filtervaluesreducer , action) {
-        switch (action.type) {
-            
-            case "change":return({...filtervaluesreducer , [action.fild] : action.payload})
-            default :
-                return filtervaluesreducer
-        }
-    } 
-    
+                        function reducerFitler(filtervaluesreducer, action) {
+                            switch (action.type) {
+                              case "change":
+                                return { 
+                                  ...filtervaluesreducer, 
+                                  [action.fild]: action.payload 
+                                };
+                              case "setSearchResults":
+                                return {
+                                  ...filtervaluesreducer,
+                                  searchResults: action.payload
+                                };
+                              default:
+                                return filtervaluesreducer;
+                            }
+                          }
+
+    function isFilterValid() {
+        return (
+          filtervaluesreducer.matricule ||
+          filtervaluesreducer.patientName ||
+          filtervaluesreducer.diagnosis ||
+          filtervaluesreducer.etat ||
+          filtervaluesreducer.appointmentDate
+        );
+      }
+
     function changefiltervaluesreducerfunction(e) {
-        
-        dispatchfiter({
+        console.log(filtervaluesreducer)
+       dispatchfiter({
             type:"change",
             fild:e.target.name,
             payload:e.target.value
         })
     }
     const [filtervaluesreducer , dispatchfiter] = useReducer(reducerFitler , initFilter)
+    useEffect(() => {
+        
+        if (isFilterValid()) {
+          // Faire l'appel API pour rechercher les données
+          console.log(filtervaluesreducer)
+          
+          axios.post('http://localhost:5000/patient/SerchPatients', filtervaluesreducer)
+            .then(response => {
+                console.log(response)
+              // Mettre à jour les résultats de la recherche dans le state
+              dispatchfiter({
+                type: "setSearchResults",
+                payload: response.data.Patients
+              });
+            })
+            .catch(error => {
+              console.error('Erreur lors de la recherche:', error);
+            });
+        }
+      }, [filtervaluesreducer]);  // L'appel API se déclenche dès qu'un filtre change
     const theresult = (ele)=> {
         
         return (
-            <tr identifier={ele?.patientId} >
+            <tr identifier={ele?.matricule} >
             <td onClick={()=>{
             
             handShow(ele)
@@ -45,7 +88,7 @@ export default function UserData() {
         onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }}
-        > {ele?.patientId } </td>
+        > {ele?.matricule } </td>
             <td onClick={()=>{
             
             handShow(ele)
@@ -53,14 +96,14 @@ export default function UserData() {
         onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }}
-        > {ele?.patientName } </td>
+        > {ele?.nom_patient } </td>
             <td onClick={()=>{
             
             handShow(ele)
         }} onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }
-        } > {ele?.appointmentDate } </td>
+        } > {ele?.next_appointment_date } </td>
         </tr>
         
     )
@@ -72,10 +115,14 @@ export default function UserData() {
         const [priv , setPriv] = useState(1)
         const [actionDelAdd  , setActionDelAdd ] = useState(null) 
         // del = 0 / add = 1 
-      
-       
         
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const [showPatient , setshowPatient] = useState()
+    const [User , setUser] = useState()
+    const [passManager , setpassManager] = useState()
+    const [passEditor , setpassEditor] = useState()
+    const [dataPatient , setdataPatient] = useState()
+    const [length_data_patient , setlength_data_patient] = useState()
     const [showdata , setShowdata] = useState([])
     const [stateOfModifier , setStateOfModifier] = useState(0)
     const [listSelected , setListSelected] = useState([])
@@ -92,11 +139,11 @@ export default function UserData() {
     const [typeofadding , setTypeOfAdding] = useState('none')
     // #####################################################################################
     let init =  {
-        matricule : "",
+        patientMatricule : "",
         patientName: "",
-        nextappointmentDate: "",
-        nextappointmentTime: "",
-
+        next_appointment_date: "",
+        next_appointment_Time: "",
+        date_naissance_patient :"",
         file_status:"",
         allergies:"",
         doctor_notes: "",
@@ -138,37 +185,6 @@ export default function UserData() {
             temperature: ""
             
         },
-        billing_information:{
-            total_cost: 0, paid_amount: 0, due_balance: 0 
-        },
-        consent_forms:[
-            // "https://example.com/consent-form-1", "https://example.com/consent-form-2"
-            {}
-        ],
-
-        doctorName: "",
-        department: "",
-        treatment: "",
-        notes: "",
-        emergencyContact: 
-        [
-            {
-                nom:"nom",
-                relation:"relation"
-            },
-            {
-                nom:"nom",
-                relation:"relation"
-            },
-            {
-                nom:"nom",
-                relation:"relation"
-            },
-            {
-                nom:"nom",
-                relation:"relation"
-            },
-        ]
         
 
     }
@@ -329,10 +345,11 @@ export default function UserData() {
                 return {...dataaddted}
             }
             case 'mod' : return ({ 
-                patientId:action.patientId,
+                patientMatricule:action.patientMatricule,
                 patientName: action.patientName,
-                appointmentDate: action.appointmentDate,
-                appointmentTime: action.appointmentTime,
+                next_appointment_date: action.next_appointment_date,
+                next_appointment_Time: action.next_appointment_Time,
+                date_naissance_patient :action.date_naissance_patient,
                 file_status:action.file_status,
                 allergies:action.allergies,
                 doctor_notes: action.doctor_notes,
@@ -346,7 +363,6 @@ export default function UserData() {
                 symptoms:action.symptoms,
                 vital_signs:action.vital_signs,
                 consent_forms:action.consent_forms,
-                billing_information:action.billing_information,
                 
             })
             default : 
@@ -378,7 +394,6 @@ export default function UserData() {
     }
     
  
-   
     // let listtesting = ["mohamed","zouaoui"]
     // console.log(listtesting[3])
     function handlChangeReducer(e) {
@@ -388,34 +403,104 @@ export default function UserData() {
             payload : e.target.value
         })
     }
+  
     function handShow(data) {
-        setStateOfModifier(0)
-        menu.current.classList.add('active')
-        // console.log(data)
-        dispatsh({
-            type:'mod',
-            patientId:data.patientId,
-            patientName: data.patientName,
-            appointmentDate: data.appointmentDate,
-            appointmentTime: data.appointmentTime,
-            file_status:data.file_status,
-            allergies:data.allergies,
-            doctor_notes: data.doctor_notes,
-            emergency_contact:data.emergency_contact,
-            insurance_details:data.insurance_details,
-            medical_history:data.medical_history,
-            diagnoses:data.diagnoses,
-            medications:data.medications,
-            treatments:data.treatments,
-            lab_results:data.lab_results,
-            symptoms:data.symptoms,
-            vital_signs:data.vital_signs,
-            consent_forms:data.consent_forms,
-            billing_information:data.billing_information
+        axios.post('http://localhost:5000/patient/findPatient', {
+            data: data.matricule
+        }).then(response => {
+            setStateOfModifier(0)
+            menu.current.classList.add('active')
+            let Patient = response.data.patient;
+            console.log(Patient)
+            // Séparer date et heure de next_appointment_date
+            let appointmentDate = "";
+            let appointmentTime = "";
+    
+            if (Patient.next_appointment_date) {
+                const [date, timeWithZ] = Patient.next_appointment_date.split('T');
+                appointmentDate = date;
+                appointmentTime = timeWithZ ? timeWithZ.replace('Z', '') : "";
+            }
+           
             
-        })
-        console.log(valueChageReduce)
+             const emergencyContact = Patient.emergency_contact
+            ? Object.entries(JSON.parse(Patient.emergency_contact)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+            
+            const insuranceDetails = Patient.insurance_details 
+            ? JSON.parse(Patient.insurance_details) 
+            : {};
+        
+        const medicalHistory = Patient.medical_history
+            ? Object.entries(JSON.parse(Patient.medical_history)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+        const diagnoses = Patient.diagnoses
+            ? Object.entries(JSON.parse(Patient.diagnoses)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+        const medications = Patient.medications
+            ? Object.entries(JSON.parse(Patient.medications)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+        const treatments = Patient.treatments
+            ? Object.entries(JSON.parse(Patient.treatments)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+        const labResults = Patient.lab_results
+            ? Object.entries(JSON.parse(Patient.lab_results)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+        const symptoms = Patient.symptoms
+            ? Object.entries(JSON.parse(Patient.symptoms)).map(([key, value]) => ({
+                  [key]: value,
+              }))
+            : [];
+        
+            const vitalSigns = Patient.vital_signs 
+            ? JSON.parse(Patient.vital_signs) 
+            : { blood_pressure: "", temperature: "" };
+            // Mise à jour du state
+            console.log("matricule : " ,Patient.patient_matricule )
+            dispatsh({
+                type: 'mod',
+                patientMatricule: Patient.patient_matricule, 
+                patientName: Patient.nom_patient,
+                next_appointment_date: appointmentDate,
+                next_appointment_Time: appointmentTime,
+                date_naissance_patient: Patient.date_naissance_patient,
+                file_status: Patient.file_status,
+                allergies: Patient.allergies,
+                doctor_notes: Patient.doctor_notes,
+                emergency_contact: emergencyContact ,
+                insurance_details: insuranceDetails,
+                medical_history: medicalHistory,
+                diagnoses: diagnoses,
+                medications: medications,
+                treatments: treatments,
+                lab_results: labResults,
+                symptoms: symptoms,
+                vital_signs: vitalSigns,
+            });
+            
+        }).catch(error => {
+            console.log(error);
+        });
     }
+    
+    
     function handlRightClickRemove(e) {
         e.preventDefault()
         e.target.parentElement.classList.toggle('selected')
@@ -428,6 +513,7 @@ export default function UserData() {
         
     }
     useEffect(() => {
+        console.log(listOfTheDeletedObejcts)
         if (listOfTheDeletedObejcts.length > 0) {
             del?.current?.classList.add('active')
         } else {
@@ -444,7 +530,7 @@ export default function UserData() {
         })
     }
     function handlClickLast() {
-        setPriv(1)
+        setPriv(length_data_patient)
         setListOfTheDeletedObejcts([]);
         [...tab.current.children].forEach((ele) => {
             ele.classList.remove('selected')
@@ -458,6 +544,7 @@ export default function UserData() {
             ele.classList.remove('selected')
         })
     }
+    
     function handlsubmitforms(e) {
         e.preventDefault()
         addmoredatamenu.current.classList.add('activate')
@@ -543,6 +630,98 @@ export default function UserData() {
                 
             })
         }
+        useEffect(() => {
+            if (!dataPatient || dataPatient.length === 0) {
+                return; // Attendre que dataPatient soit rempli
+            }
+        
+            let start = (priv - 1) * 10; // Calcul de l'index de départ
+            let vid = [];
+        
+            for (let i = 0; i < 10; i++) {
+                const item = dataPatient[start + i];
+                if (item) {
+                    vid.push(item);
+                }
+            }
+        
+            setShowdata(vid); // Mise à jour des données affichées
+            console.log("showdata updated:", vid);
+        }, [priv, dataPatient]); // Dépendances
+        
+      // fonction qui permet d'ajouter le patient 
+    function  Addpatient() {
+        axios.post('http://localhost:5000/patient/addpatient',{
+            data : valueChageReduce,
+            passManager : passManager,
+            user : User.data.info,
+        }).then(response => {
+            console.log(response.data)
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+    function  deletePatient() {
+        axios.post('http://localhost:5000/patient/deletpatient',{
+            passManager : passManager,
+            user : User.data.info,
+            listOfTheDeletedObejcts : listOfTheDeletedObejcts
+        }).then(response => {
+            console.log(response.data)
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+    // fonction qui avoire les element du tableau 
+    useEffect(() => {
+        const savedInfo = JSON.parse(localStorage.getItem("userAuth"));
+        console.log("jsonsamet",JSON.parse(localStorage.getItem("userAuth")))
+        if (savedInfo) {
+            setUser(savedInfo); 
+            console.log("User",User)// Utilise l'état pour enregistrer les données
+        } else {
+            console.error("Aucune donnée trouvée dans localStorage");
+        }
+        axios.post('http://localhost:5000/patient/getPatient',{
+        }).then(response => {
+            console.log(response.data);
+
+      const data1 = response.data.data || [];
+      setdataPatient(data1);
+
+      const calculatedLength = Math.ceil(data1.length / 10); // Calcul de la pagination
+      setlength_data_patient(calculatedLength);
+
+      console.log("Length:", calculatedLength);
+        }).catch((error) => {
+            console.log(error)
+        })
+       }
+      , []);
+      function  uppdatepatient(){
+        console.log(valueChageReduce)
+        axios.post('http://localhost:5000/patient/UpdatePatients',{  
+            matricule : valueChageReduce.patientMatricule,   
+            data : valueChageReduce
+        }).then(response => {
+            console.log(response.data)
+        }).catch((error) => {
+            console.log(error)
+        })
+      }
+      function verfAdmin(){
+        axios.post('http://localhost:5000/auth/VerfAdmin',{  
+            passEditor : passEditor,
+            user : User.data.info,
+        }).then(response => {
+            console.log(response.data)
+            passwordReq.current.classList.remove('active')
+            handShow(showPatient)
+        }).catch((error) => {
+            console.log(error)
+        })
+      }
     // ********************************************************///?????????????????????????????????????????????//////////////////////////////////////**********
     // ###################################################################################
     // ###################################################################################
@@ -552,12 +731,10 @@ export default function UserData() {
             <div onClick={(e)=>{
                 e.stopPropagation()
             }} ref={passwordReq} className="passwordReq">
-                <p>please the enter "{actionDelAdd === 0 ? "delete password" : actionDelAdd === 1 ? "add password" : null}"</p>
-                <input ref={passwordReqinput} onClick={(e)=>{
-                e.stopPropagation()
-            }}  type="password" />
+                <p>please the enter "{actionDelAdd === 0 || actionDelAdd  === 3 ? "Manager password" : actionDelAdd === 2 ? "Editor password" : null}"</p>
+                <input  value={passManager} onChange={(e) =>{ if(actionDelAdd === 0 || actionDelAdd  === 3 ){ setpassManager(e.target.value)}else{setpassEditor(e.target.value)}} }  type="password" />
                 <i onClick={()=>{passwordReq.current.classList.remove('active')}} ref={iCancalepasswordReq} class="fa-solid fa-xmark"></i>
-                <button ref={theImportanteButton} >submit</button>
+                <button ref={theImportanteButton} onClick={()=>{ if(actionDelAdd ===0) { deletePatient()} else { if(actionDelAdd === 3){Addpatient()}else{ verfAdmin()};} }}  >submit</button>
             </div>
             <div ref={menu} className="moreinfo"> 
 
@@ -581,8 +758,9 @@ export default function UserData() {
                                         
                                         <form action="" onSubmit={(e)=>{
                                                 e.preventDefault()
-                                                
+                                        
                                                 const formData = new FormData(e.target)
+                                                
                                                 let name = formData.get("name")
                                                 let phone = formData.get("phone")
                                                 
@@ -651,7 +829,7 @@ export default function UserData() {
                                             </div>
                                             <div>   
                                                 <label htmlFor="" className="active">policy number</label>
-                                                <input type="text" onChange={(e)=>insurance_detailsFunction()} className="round" value={valueChageReduce?.insurance_details?.policy_number} name="policy_number" placeholder="policy number" />
+                                                <input type="text" onChange={(e)=>insurance_detailsFunction(e)} className="round" value={valueChageReduce?.insurance_details?.policy_number} name="policy_number" placeholder="policy number" />
                                             </div>
                                             {/* <button className="activate">save</button> */}
                                     </div>
@@ -750,7 +928,7 @@ export default function UserData() {
                                 </form>
                                 <div>
                                 {
-                                        Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                                        Object.keys(valueChageReduce?.diagnoses[0]).length === 0 
                                             ? null 
                                             : (<table className="tableshowinfo">
                                                 <tr>
@@ -811,7 +989,7 @@ export default function UserData() {
                                 </form>
                                 <div>
                                 {
-                                        Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                                        Object.keys(valueChageReduce.medications[0]).length === 0 
                                             ? null 
                                             : (<table className="tableshowinfo">
                                                 <tr>
@@ -871,8 +1049,9 @@ export default function UserData() {
                                     </div>
                                 </form>
                                 <div>
+                                    
                                 {
-                                        Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                                        Object.keys(valueChageReduce.treatments[0]).length === 0 
                                             ? null 
                                             : (<table className="tableshowinfo">
                                                 <tr>
@@ -883,7 +1062,7 @@ export default function UserData() {
                                                 </tr>
                                                 {
                                                     // console.log(valueChageReduce.emergency_contact[0])
-                                                    Object.keys(valueChageReduce.treatments[0]).map((ele ,ind)=>{
+                                                    Object.keys(valueChageReduce?.treatments[0]).map((ele ,ind)=>{
                                                         return(
                                                             <tr>
                                                                 <td>{valueChageReduce?.treatments[0][ele]["type"]}</td>
@@ -932,7 +1111,7 @@ export default function UserData() {
                                 </form>
                                 <div>
                                 {
-                                        Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                                        Object.keys(valueChageReduce.lab_results[0]).length === 0 
                                             ? null 
                                             : (<table className="tableshowinfo">
                                                 <tr>
@@ -988,7 +1167,7 @@ export default function UserData() {
                                 </form>
                                 <div>
                                 {
-                                        Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                                        Object.keys(valueChageReduce.symptoms[0]).length === 0 
                                             ? null 
                                             : (<table className="tableshowinfo">
                                                 <tr>
@@ -1035,78 +1214,78 @@ export default function UserData() {
                                 </form>
                                 
                             </div>),
-                            "billing_information":
-                            (<div className="chosingDiv">
-                                <h3>billing information</h3>
+                            // "billing_information":
+                            // (<div className="chosingDiv">
+                            //     <h3>billing information</h3>
                                 
-                                <form action="">
-                                    <div className="infoadd">
-                                            <div>
-                                                <label htmlFor="" className="active">total_cost</label>
-                                                <input type="number" name="total_cost" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.total_cost} placeholder="total cost " />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="" className="active">paid amount</label>
-                                                <input type="number" name="paid_amount" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.paid_amount}  placeholder="paid amount" />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="" className="active">due_balance</label>
-                                                <input type="number" name="due_balance" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.due_balance} className="round"  placeholder="due balance" />
-                                            </div>
-                                            {/* <button className="activate">save</button> */}
-                                    </div>
-                                </form>
-                            </div>),
+                            //     <form action="">
+                            //         <div className="infoadd">
+                            //                 <div>
+                            //                     <label htmlFor="" className="active">total_cost</label>
+                            //                     <input type="number" name="total_cost" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.total_cost} placeholder="total cost " />
+                            //                 </div>
+                            //                 <div>
+                            //                     <label htmlFor="" className="active">paid amount</label>
+                            //                     <input type="number" name="paid_amount" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.paid_amount}  placeholder="paid amount" />
+                            //                 </div>
+                            //                 <div>
+                            //                     <label htmlFor="" className="active">due_balance</label>
+                            //                     <input type="number" name="due_balance" onChange={(e)=>(billing_informationFunction(e))} value={valueChageReduce?.billing_information?.due_balance} className="round"  placeholder="due balance" />
+                            //                 </div>
+                            //                 {/* <button className="activate">save</button> */}
+                            //         </div>
+                            //     </form>
+                            // </div>),
                             // mull
-                            "consent_forms":
-                            (<div className="chosingDiv">
-                                <h3>consent forms</h3>
+                            // "consent_forms":
+                            // (<div className="chosingDiv">
+                            //     <h3>consent forms</h3>
                                 
-                                <form action="" onSubmit={(e)=>{
-                                    e.preventDefault()
-                                    // console.log(e)
-                                    const formData = new FormData(e.target)
-                                    let link = formData.get("link")
-                                    dispatsh({
-                                        type:"consent_formsAdd",
-                                        payload:link
-                                    })
-                                }}>
-                                    <div className="infoadd">
-                                            <div>
-                                                <label htmlFor="" className="active">link</label>
-                                                <input type="text"  name="link" placeholder="link" />
-                                            </div>
-                                            <button type="submit" className="activate">Integrate</button>
-                                    </div>
-                                </form>
-                                <div>
+                            //     <form action="" onSubmit={(e)=>{
+                            //         e.preventDefault()
+                            //         // console.log(e)
+                            //         const formData = new FormData(e.target)
+                            //         let link = formData.get("link")
+                            //         dispatsh({
+                            //             type:"consent_formsAdd",
+                            //             payload:link
+                            //         })
+                            //     }}>
+                            //         <div className="infoadd">
+                            //                 <div>
+                            //                     <label htmlFor="" className="active">link</label>
+                            //                     <input type="text"  name="link" placeholder="link" />
+                            //                 </div>
+                            //                 <button type="submit" className="activate">Integrate</button>
+                            //         </div>
+                            //     </form>
+                            //     <div>
 
-                                {
-                                    Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
-                                    ? null 
-                                    : (<table className="tableshowinfo">
-                                                <tr>
-                                                    {/* symptoms */}
-                                                    <th>link</th>
+                            //     {
+                            //         Object.keys(valueChageReduce.emergency_contact[0]).length === 0 
+                            //         ? null 
+                            //         : (<table className="tableshowinfo">
+                            //                     <tr>
+                            //                         {/* symptoms */}
+                            //                         <th>link</th>
                                                     
-                                                    <th>delete</th>
-                                                </tr>
-                                                {
-                                                    // console.log(valueChageReduce.emergency_contact[0])
-                                                    Object.keys(valueChageReduce.consent_forms[0]).map((ele ,ind)=>{
-                                                        return(
-                                                            <tr>
-                                                                <td><a target="_blank" href={valueChageReduce?.consent_forms[0][ele]}>{valueChageReduce?.consent_forms[0][ele]}</a></td>
-                                                                <td><button data-item={ele} onClick={(e)=>{consent_formsButton(e)}} className="remove">remove</button></td>
-                                                            </tr>
-                                                        )
-                                                    })
-                                                }
-                                            </table>)
-                                        }
-                                    </div>
-                            </div>),
+                            //                         <th>delete</th>
+                            //                     </tr>
+                            //                     {
+                            //                         // console.log(valueChageReduce.emergency_contact[0])
+                            //                         Object.keys(valueChageReduce.consent_forms[0]).map((ele ,ind)=>{
+                            //                             return(
+                            //                                 <tr>
+                            //                                     <td><a target="_blank" href={valueChageReduce?.consent_forms[0][ele]}>{valueChageReduce?.consent_forms[0][ele]}</a></td>
+                            //                                     <td><button data-item={ele} onClick={(e)=>{consent_formsButton(e)}} className="remove">remove</button></td>
+                            //                                 </tr>
+                            //                             )
+                            //                         })
+                            //                     }
+                            //                 </table>)
+                            //             }
+                            //         </div>
+                            // </div>),
                         }[typeofadding]
                     }
                     {/* switch ########################################################### */}
@@ -1122,28 +1301,33 @@ export default function UserData() {
                 </div>
 
                 <button onClick={()=>{
+                    console.log("add")
+                      console.log(valueChageReduce)  
                     /////////////////// important ////////////////////////////
-                            // passwordReq.current.classList.add('active')
-                            setActionDelAdd(1)
+                            // 
+                           
                             if (stateOfModifier === 1) {
-                               
+                                passwordReq.current.classList.add('active')
+                                setActionDelAdd(3)
+                              
+                            
                             } else if (stateOfModifier === 0) {
-                                
+                                uppdatepatient()
                             }
                             // console.log(valueChageReduce)
                         }} className="addmodfie"> {stateOfModifier === 0 ? "Save Changes":stateOfModifier === 1 ? "Add" : null } </button>
                 </div>
                 <form action="" onSubmit={handlsubmitforms} className="changeAdd">
-                    <label htmlFor=""> Matricule </label>
-                    <input name="patientId" type="number" readOnly  />
+                   {/* <label htmlFor=""> Matricule </label>
+                    <input name="matricule" type="number"  onChange={handlChangeReducer}  value={valueChageReduce?.matricule} /> */}
                     <label htmlFor=""> patient Name </label>
                     <input name="patientName" type="text" onChange={handlChangeReducer}  value={valueChageReduce?.patientName} />
                     <label htmlFor=""> date of birth  </label>
-                    <input name="appointmentDate" type="date" onChange={handlChangeReducer} value={valueChageReduce?.dateofbirth}  />
+                    <input name="date_naissance_patient" type="date" onChange={handlChangeReducer} value={valueChageReduce?.date_naissance_patient}  />
                     <label htmlFor=""> date of next appotment </label>
-                    <input name="appointmentDate" type="date" onChange={handlChangeReducer} value={valueChageReduce?.appointmentDate}  />
+                    <input name="next_appointment_date" type="date" onChange={handlChangeReducer} value={valueChageReduce?.next_appointment_date}  />
                     <label htmlFor=""> time </label>
-                    <input name="appointmentTime" type="time" onChange={handlChangeReducer} value={valueChageReduce?.appointmentTime}></input>
+                    <input name="next_appointment_Time" type="time" onChange={handlChangeReducer} value={valueChageReduce?.next_appointment_Time} />
                     <label htmlFor=""> file status </label>
                     <input name="file_status" type="text" onChange={handlChangeReducer} value={valueChageReduce?.file_status} />
                     <label htmlFor=""> all ergies </label>
@@ -1205,23 +1389,104 @@ export default function UserData() {
             <div className="searchingFilter">
                 <h2>searching by : </h2>
                 <form action="">
-                    <input type="number" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.patientId} name="patientId" id="" placeholder="patientId" />
+                    <input type="number" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.patientMatricule} name="matricule" id="" placeholder="matricule" />
                     <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.patientName} name="patientName" id="" placeholder="patientName" />
-                    <input type="date" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.appointmentDate} name="appointmentDate" id="" placeholder="appointmentDate" />
+                    <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.diagnosis} name="diagnosis" id="" placeholder="diagnosis" />
+                    <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.etat} name="etat" id="" placeholder="etat" />
+                    <input type="date" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.nextappointmentDate} name="appointmentDate" id="" placeholder="appointmentDate" />
+                    
                 </form>
-                {filtervaluesreducer.patientId || filtervaluesreducer.patientName || filtervaluesreducer.appointmentDate ?
+                {filtervaluesreducer.patientMatricule || filtervaluesreducer.patientName || filtervaluesreducer.nextappointmentDate ||filtervaluesreducer.diagnosis || filtervaluesreducer.etat ?
                 (<table ref={tab}>
                     <tr>
                         <th>Matricule</th>
                         <th>Patient Name</th>
                         <th>Next Appointment Date</th>
+                        <th>diagnosis</th>
                         <th>etat</th>
                     </tr>
-                    
+                    {
+                        filtervaluesreducer.searchResults.map((ele ,i)=> {
+                            let data = ele
+                            // console.log(ele)
+                            const message = (<p>data not existe</p>)
+                            if (!data) {
+                                return null
+                            } else {
+                                // console.log(data)
+                                // 1
+                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && !filtervaluesreducer.appointmentDate) {
+                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule)) && (ele.nom_patient.includes((filtervaluesreducer.patientName)))) {
+                                        return theresult(ele)
+                                    }
+                                    else {
+                                        return null
+                                    }
+                                }
+                                // 2
+                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.nextappointmentDate && !filtervaluesreducer.patientName) {
+                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
+                                        return theresult(ele)
+                                    }
+                                    else {
+                                        return null
+                                    }
+                                }
+                                // 3
+                                if (filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate && !filtervaluesreducer.matricule ) {
+                                    if (ele.nom_patient.includes((filtervaluesreducer.patientName)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
+                                        return theresult(ele)
+                                    }
+                                    else {
+                                        return null
+                                    }
+                                }
+                                // 4
+                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate ) {
+                                    if ((ele.matricule === parseInt((filtervaluesreducer.patientMatricule))) &&  ele.nom_patient.includes((filtervaluesreducer.patientName)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
+                                        return theresult(ele)
+                                    }
+                                    else {
+                                        return null
+                                    }
+                                }
+                                // 5
+                                if (filtervaluesreducer.patientMatricule && !filtervaluesreducer.patientName && !filtervaluesreducer.nextappointmentDate) {
+                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule))) {
+                                        return theresult(ele)
+                                    }else {
+                                        return null
+                                    }
+
+                                }
+                                // 6
+                                if (!filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && !filtervaluesreducer.nextappointmentDate ) {
+                                    if (ele.nom_patient.includes((filtervaluesreducer.patientMatricule))) {
+                                        return theresult(ele)
+                                    }else {
+                                        return null
+                                    }
+                                }
+                                // 7
+                                if (!filtervaluesreducer.patientMatricule && !filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate ) {
+                                    if (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate))) {
+                                        return theresult(ele)
+                                    }else {
+                                        return null
+                                    }
+                                }
+                                // 8 -<>-
+                                
+                            }
+                            }
+                        )
+                        
+                        
+                    }      
                 </table>) :
                 null}
             </div>
-            {!(filtervaluesreducer.patientId || filtervaluesreducer.patientName || filtervaluesreducer.appointmentDate) ?
+            {!(filtervaluesreducer.matricule || filtervaluesreducer.patientName || filtervaluesreducer.nextappointmentDate) ?
             (<div className="info">
                 <div className="top">
                     <h2>Patient Schedule Template</h2>
@@ -1238,6 +1503,7 @@ export default function UserData() {
                     <th>Matricule</th>
                         <th>Patient Name</th>
                         <th>Next Appointment Date</th>
+                        <th>diagnosis</th>
                         <th>etat</th>
                     </tr>
                     {
@@ -1248,30 +1514,53 @@ export default function UserData() {
                             } else {
                                 // console.log(data)
                                 return (
-                                    <tr identifier={showdata[i]?.patientId} >
+                                    <tr identifier={showdata[i]?.matricule} >
                                     <td onClick={()=>{
-                                    
+                                    passwordReq.current.classList.add('active');
+                                    setActionDelAdd(2)
                                     handShow(data)
+                                    setshowPatient(data)
                                 }}
                                 onContextMenu={(e)=> {
                                     handlRightClickRemove(e)
                                 }}
-                                > {showdata[i]?.patientId } </td>
+                                > {showdata[i]?.matricule } </td>
                                     <td onClick={()=>{
-                                    
-                                    handShow(data)
+                                    passwordReq.current.classList.add('active');
+                                    setActionDelAdd(2)
+                                    setshowPatient(data)
                                 }}  
                                 onContextMenu={(e)=> {
                                     handlRightClickRemove(e)
                                 }}
-                                > {showdata[i]?.patientName } </td>
+                                > {showdata[i]?.nom_patient } </td>
                                     <td onClick={()=>{
                                     
-                                    handShow(data)
+                                    passwordReq.current.classList.add('active');
+                                    setActionDelAdd(2)
+                                    setshowPatient(data)
                                 }} onContextMenu={(e)=> {
                                     handlRightClickRemove(e)
                                 }
-                                } > {showdata[i]?.appointmentDate } </td>
+                                } > {showdata[i]?.next_appointment_date } </td>
+                                 <td onClick={()=>{
+                                    passwordReq.current.classList.add('active');
+                                    setActionDelAdd(2)
+                                    setshowPatient(data)
+                                }} onContextMenu={(e)=> {
+                                    handlRightClickRemove(e)
+                                }
+                                } > {showdata[i]?.diagnosis } </td>
+                                 <td onClick={()=>{
+                                    passwordReq.current.classList.add('active');
+                                    setActionDelAdd(2)
+                                    setshowPatient(data)
+                                }} onContextMenu={(e)=> {
+                                   
+                                    handlRightClickRemove(e)
+                                }
+                                } > {showdata[i]?.etat
+                                } </td>
                                 </tr>
                                 
                             )
@@ -1286,7 +1575,7 @@ export default function UserData() {
                     {/*  */}
                     <button onClick={()=> {handlClickFirst()}} >First page</button>
                     {
-                        [...Array(1)].map((ele,i)=>{
+                        [...Array(length_data_patient)].map((ele,i)=>{
                             return(<button className={(i+1)===priv ? 'active':null} onClick={()=>{handlClickButtonMove(i+1)}} >{i+1}</button>)
                         })
                     }

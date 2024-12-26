@@ -1,0 +1,151 @@
+const { MongoClient } = require("mongodb");
+const Key = require("../crypto/modules/key");
+const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
+require('../crypto/modules/aesCTR.js'); 
+const Aes = require('../crypto/modules/aes.js');
+const { getLastMatricules } = require('./GetLastMat.js');
+const { getLatestData } = require('./FindData.js');
+
+const NODE_URIS = [
+  "mongodb://localhost:27018/dossier_medical",
+  "mongodb://localhost:27019/dossier_medical",
+  "mongodb://localhost:27020/dossier_medical",
+  "mongodb://localhost:27021/dossier_medical",
+];
+
+async function RechercheNom(Nom) {
+  const matricules = await getLastMatricules();
+  const dataList = await getLatestData(matricules);
+  console.log("Fetched data:", dataList);
+
+  // Filter the data to match the provided name (case-insensitive, contains)
+  const filteredData = dataList.filter(data => 
+    data.nom_patient && data.nom_patient.toLowerCase().includes(Nom.toLowerCase())
+  );
+
+  const result = {
+    count: filteredData.length,
+    matricules: filteredData.map(data => data.matricule) 
+  };
+
+  if (result.count > 0) {
+    console.log(`Found ${result.count} matches for name '${Nom}':`, result.matricules);
+  } else {
+    console.log(`No matches found for name '${Nom}'.`);
+  }
+
+  return result;
+}
+
+// Example usage
+/*
+RechercheNom("Abdou").then(result => {
+  console.log("number of results : "+result.count);
+  console.log("results : "+result.matricules);
+});
+*/
+
+async function RechercheDiagnosis(Diagnosis, matricules = []) {
+  try {
+    // Check if matricules is empty
+    if (matricules.length === 0) {
+      matricules = await getLastMatricules();
+    }
+
+    // Fetch latest data for the provided matricules
+    const dataList = await getLatestData(matricules);
+    console.log("Fetched data:", dataList);
+
+    // Filter the data to match the provided Diagnosis
+    const filteredData = dataList.filter(data => 
+      data.diagnosis &&
+      Array.isArray(data.diagnosis) &&
+      data.diagnosis.some(diag => diag.toLowerCase().includes(Diagnosis.toLowerCase()))
+    );
+
+    // Construct the result object
+    const result = {
+      count: filteredData.length,
+      matricules: filteredData.map(data => data.matricule)
+    };
+
+    // Log results
+    if (result.count > 0) {
+      console.log(`Found ${result.count} matches for Diagnosis '${Diagnosis}':`, result.matricules);
+    } else {
+      console.log(`No matches found for Diagnosis '${Diagnosis}'.`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("An error occurred:", error);
+    throw error;
+  }
+}
+
+// Example usage
+/*
+RechercheNom("Abdou").then(nameResult => {
+  const nameMatricules = nameResult.matricules; 
+  return RechercheDiagnosis("cancer", nameMatricules);
+}).then(diagnosisResult => {
+  console.log(`Number of elements found: ${diagnosisResult.count}`);
+  console.log("Matricules of matching elements:", diagnosisResult.matricules);
+}).catch(error => {
+  console.error("An error occurred:", error);
+});
+
+*/
+
+async function RechercheFileStatus(etat, matricules = []) {
+  try {
+    // Check if matricules is empty
+    if (matricules.length === 0) {
+      matricules = await getLastMatricules();
+    }
+
+    // Fetch latest data for the provided matricules
+    const dataList = await getLatestData(matricules);
+    console.log("Fetched data:", dataList);
+
+    // Filter the data to match the provided Diagnosis
+    const filteredData = dataList.filter(data => 
+      data.etat && data.etat.toLowerCase().includes(etat.toLowerCase())
+    );
+    
+
+    // Construct the result object
+    const result = {
+      count: filteredData.length,
+      matricules: filteredData.map(data => data.matricule)
+    };
+
+    // Log results
+    if (result.count > 0) {
+      console.log(`Found ${result.count} matches for etat '${etat}':`, result.matricules);
+    } else {
+      console.log(`No matches found for etat '${etat}'.`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("An error occurred:", error);
+    throw error;
+  }
+}
+module.exports = {RechercheFileStatus,RechercheDiagnosis,RechercheNom}
+/*
+RechercheNom("Abdou").then(nameResult => {
+  const nameMatricules = nameResult.matricules; 
+    return RechercheDiagnosis("cancer", nameMatricules);
+}).then(diagnosisResult => {
+  const diagnosisMatricules = diagnosisResult.matricules; 
+
+  return RechercheFileStatus("inactive", diagnosisMatricules);
+}).then(fileStatusResult => {
+  console.log(`Number of elements found: ${fileStatusResult.count}`);
+  console.log("Matricules of matching elements:", fileStatusResult.matricules);
+}).catch(error => {
+  console.error("An error occurred:", error);
+});
+*/

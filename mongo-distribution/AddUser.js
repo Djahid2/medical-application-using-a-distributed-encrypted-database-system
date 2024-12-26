@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/auth', authRoutes);
-
+app.use('/patient', userRoutes)
 
 // Démarrer le serveur
 app.listen(PORT, () => {

@@ -31,6 +31,17 @@ export default function Signup() {
             return {...newUser , [action.fild]:action.payload}
         }
     } 
+    const [passErrors, setPassErrors] = useState({
+        passmanager: "",
+        passEditor: "",
+        pass:""
+      });
+    
+      const [etatPass, setEtatPass] = useState({
+        passmanager: false,
+        passEditor: false,
+        pass:false
+      });
     const [newUser , dispatsh] = useReducer(reducer , init)
     function handlChange(e) {
         dispatsh({
@@ -39,10 +50,16 @@ export default function Signup() {
             payload: e.target.value
         })
         if (e.target.id === "pass") {
-            checkPasswordStrength(e.target.value); // Vérification uniquement pour le mot de passe
+            checkPasswordStrength(e.target.value, "pass");
+             // Vérification uniquement pour le mot de passe
         }
-    }
+         if(e.target.id === "passmanager"){checkPasswordStrength(e.target.value,"passmanager")}
+         if(e.target.id === "passEditor"){checkPasswordStrength(e.target.value ,"passEditor" )}
+            
 
+        
+    }
+  /*
     const checkPasswordStrength = (password) => {
         if (password === "") {
             setpasserror(null);
@@ -84,8 +101,60 @@ export default function Signup() {
             setpasserror(`Your password is Very Weak<. Try including: ${missingCriteria.join(", ")}`);
             setetatpass(true)
         }
-    };
-    function Verfication() {
+    };*/
+    const checkPasswordStrength = (password, fieldName) => {
+        if (password === "") {
+          setPassErrors((prev) => ({ ...prev, [fieldName]: null }));
+          return;
+        }
+    
+        const lowercase = /[a-z]/;
+        const uppercase = /[A-Z]/;
+        const digit = /[0-9]/;
+        const specialChar = /[—’!"#$%&`()*+,\-./:;<=>?@\[\\\]^_'{|}~]/;
+    
+        let score = 0;
+        let missingCriteria = [];
+    
+        if (lowercase.test(password)) score++;
+        else missingCriteria.push("lowercase letters");
+    
+        if (uppercase.test(password)) score++;
+        else missingCriteria.push("uppercase letters");
+    
+        if (digit.test(password)) score++;
+        else missingCriteria.push("numbers");
+    
+        if (specialChar.test(password)) score++;
+        else missingCriteria.push("special characters");
+    
+        if (password.length < 6)
+          missingCriteria.push("Password must contain at least 6 characters");
+    
+        let feedback = "";
+        if (score === 4) {
+          feedback = `Your password is Very Strong. ${missingCriteria.join(", ")}`;
+          setEtatPass((prev) => ({ ...prev, [fieldName]: false }));
+        } else if (score === 3) {
+          feedback = `Your password is Strong. Try adding: ${missingCriteria.join(
+            ", "
+          )}`;
+          setEtatPass((prev) => ({ ...prev, [fieldName]: false }));
+        } else if (score === 2) {
+          feedback = `Your password is Weak. Consider adding: ${missingCriteria.join(
+            ", "
+          )}`;
+          setEtatPass((prev) => ({ ...prev, [fieldName]: true }));
+        } else {
+          feedback = `Your password is Very Weak. Try including: ${missingCriteria.join(
+            ", "
+          )}`;
+          setEtatPass((prev) => ({ ...prev, [fieldName]: true }));
+        }
+    
+        setPassErrors((prev) => ({ ...prev, [fieldName]: feedback }));
+      };
+    function  Verfication() {
       
         // console.log(newUser)
         setWaiting(true)
@@ -124,7 +193,7 @@ function handSubmit(e){
     e.preventDefault()
     Verfication();
     console.log(haserror)
-    if(!haserror && !etatpass){
+    if(!haserror && !etatPass.pass && etatPass.passEditor && !etatPass.passmanager){
         axios.post('http://localhost:5000/auth/register',{
             username:newUser.name,
             email:newUser.email,
@@ -190,16 +259,18 @@ function handSubmit2(e){
                             <input value={newUser.email} onChange={handlChange} id="email" type="text" placeholder="Email..." />
                             <label htmlFor="pass">Enter A Password</label>
                             <input value={newUser.pass} onChange={handlChange} type="password" id="pass" placeholder="password..." />
-                            {passerror ? <p className="passerror"  style={{color: etatpass? "red":"green" }}>{passerror}</p> : null}
+                            {passErrors.pass ? <p className="passerror"  style={{color: etatPass.pass? "red":"green" }}>{passErrors.pass}</p> : null}
                             <label htmlFor="passr">confirm password</label>
                             <input value={newUser.passr} onChange={handlChange} id='passr' type="password" placeholder="confirm password..." />
                             {/* ################ 1dec */}
                             <label htmlFor="passr">Manager  Password</label>
                             <input value={newUser.passmanager} onChange={handlChange} id='passmanager' type="password" placeholder=" Manager Password..." />
+                            {passErrors.passmanager ? <p className="passerror"  style={{color: etatPass.passmanager? "red":"green" }}>{passErrors.passmanager}</p> : null}
                             <label htmlFor="passr">confirm Manager  Password</label>
                             <input value={newUser.passmanagerr} onChange={handlChange} id='passmanagerr' type="password" placeholder="confirm Manager  Password..." />
                             <label htmlFor="passr">Editor Password </label>
                             <input value={newUser.passEditor} onChange={handlChange} id='passEditor' type="password" placeholder="Editor Password..." />
+                            {passErrors.passEditor ? <p className="passerror"  style={{color: etatPass.passEditor? "red":"green" }}>{passErrors.passEditor}</p> : null}
                             <label htmlFor="passr">confirm Editor Password</label>
                             <input value={newUser.passEditorr} onChange={handlChange} id='passEditorr' type="password" placeholder="confirm Editor Password..." />
                             {/* ################ */}
