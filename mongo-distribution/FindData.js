@@ -185,14 +185,14 @@ findKey(20241631030).then(key => {
   console.log(getLatestData(lastFive));// Array of the last 5 matricules with their decrypted data
 });
 */
-
+/*
 (async () => {
   const matricules = await getLast50Matricules(2);
   console.log(matricules)
   const data = await getLatestData(matricules);
   console.log("Fetched data:", data);
 })();
-
+*/
 
 module.exports = {findData,findKey,getLatestData};
 

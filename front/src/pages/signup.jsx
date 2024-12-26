@@ -193,7 +193,7 @@ function handSubmit(e){
     e.preventDefault()
     Verfication();
     console.log(haserror)
-    if(!haserror && !etatPass.pass && etatPass.passEditor && !etatPass.passmanager){
+    if(!haserror && !etatPass.pass && !etatPass.passEditor && !etatPass.passmanager){
         axios.post('http://localhost:5000/auth/register',{
             username:newUser.name,
             email:newUser.email,
@@ -221,6 +221,7 @@ function handSubmit2(e){
             console.log("Response:", response.data);
             const info = {pass:true ,data: {info : response.data.info}}
             userAuth.setAuthor(info)
+            localStorage.setItem('userAuth', JSON.stringify(info));
             navigate('/user/dashboard', {state : {isP:'yes' , info :response.data.info} })
         }).catch((error) => {
 

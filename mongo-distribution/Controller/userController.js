@@ -2,7 +2,7 @@ const { MongoClient } = require("mongodb");
 const FailedLoginAttempt = require('./Failedlogin');
 const Key = require('../../crypto/modules/key');
 const {distributeData} = require('../InsertData');
-const {getLastMatricules} = require("../GetLastMat");
+const {getLastMatricules,getLast50Matricules} = require("../GetLastMat");
 const {getLatestData,findData} = require("../FindData")
 const Aes = require('../../crypto/modules/aes');
 require('../../crypto/modules/aesCTR');
@@ -268,9 +268,10 @@ try{
 
 ///////////////////////
 exports.Getpatient = async (req, res) =>{
+  const list = req.body.list
   try{
   (async () => {
-    const matricules = await getLastMatricules();
+    const matricules = await getLast50Matricules(list);
     const data = await getLatestData(matricules);
     return res.status(200).json({ message: "Patient get",data : data });
   })();
@@ -369,14 +370,32 @@ exports.UpdatePatients = async (req,res) => {
   }
 }
 
+////////
+async function transformPatientData(patientData) {
+  // Parse le JSON des diagnoses et extrait les diagnoses sous forme de tableau
+  const diagnoses = JSON.parse(patientData.diagnoses);
+
+  // Transforme le champ diagnosis comme vous le souhaitez
+  const diagnosisList = diagnoses.map(diagnosis => diagnosis.diagnosis);
+
+  return {
+    diagnosis: diagnosisList, // Met les diagnoses sous forme de tableau
+    etat: patientData.file_status, // 'file_status' devient 'etat'
+    matricule: patientData.patient_matricule, // 'patient_matricule' devient 'matricule'
+    next_appointment_date: patientData.next_appointment_date, // 'next_appointment_date' reste inchangé
+    nom_patient: patientData.nom_patient // 'nom_patient' reste inchangé
+  };
+}
 
 exports.SerchPatients = async (req,res) => {
   try{
     let Patients
      const data = req.body
      console.log("data liwslet :" ,data)
-     if(data.matricule){
-       Patients = await findData(data.matricule)
+     if(data.patientMatricule){
+       Patients = await findData(data.patientMatricule)
+       Patients = await transformPatientData(Patients)
+       return res.status(200).json({ message: "Patient get", Patients :  {data : [Patients]} })
      }else{
      if(data.patientName ){
        Patients = await RechercheNom(data.patientName)
@@ -393,7 +412,7 @@ exports.SerchPatients = async (req,res) => {
         (async () => {
           const matricules = await getLastMatricules();
             Patients = await getLatestData(matricules);
-          return res.status(200).json({ message: "Patient get", Patients : Patients });
+          return res.status(200).json({ message: "Patient get", Patients : {data : [Patients]} });
         })();
       }
      }

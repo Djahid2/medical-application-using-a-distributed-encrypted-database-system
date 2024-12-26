@@ -8,8 +8,19 @@ export default function UserData() {
     // {data.author.data.name}
     
     // #####################################################################################
-   
- 
+  
+    
+    function handlRightClickRemove(e) {
+        e.preventDefault()
+        e.target.parentElement.classList.toggle('selected')
+        let item = e.target.parentElement.getAttribute('identifier')
+        if (listOfTheDeletedObejcts.indexOf(item) === -1) {
+            setListOfTheDeletedObejcts((prev)=>([...prev,item]))
+        } else {
+            setListOfTheDeletedObejcts((prev)=> (prev.filter((ele)=>(ele !== item ? ele : null))))
+        }
+        
+    }
     // //////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////
     let initFilter = {
@@ -33,35 +44,83 @@ export default function UserData() {
                                   ...filtervaluesreducer,
                                   searchResults: action.payload
                                 };
+                                case "resetSearchResults":
+                                return {
+                                    ...filtervaluesreducer,
+                                     searchResults: []
+                                                        };
                               default:
                                 return filtervaluesreducer;
                             }
                           }
-
-    function isFilterValid() {
-        return (
-          filtervaluesreducer.matricule ||
-          filtervaluesreducer.patientName ||
-          filtervaluesreducer.diagnosis ||
-          filtervaluesreducer.etat ||
-          filtervaluesreducer.appointmentDate
-        );
-      }
-
+                          function isFilterValid(filter) {
+                            return (
+                              filter.patientMatricule ||
+                              filter.patientName ||
+                              filter.diagnosis ||
+                              filter.etat ||
+                              filter.nextappointmentDate
+                            );
+                          }
+     const [debouncedFilter, setDebouncedFilter] = useState(initFilter);
+      const isLoadingRef = useRef(false);
     function changefiltervaluesreducerfunction(e) {
-        console.log(filtervaluesreducer)
+      
+        dispatchfiter({
+            type: "resetSearchResults"
+        });
+        console.log("serchevide",filtervaluesreducer)
        dispatchfiter({
             type:"change",
             fild:e.target.name,
             payload:e.target.value
         })
+        isLoadingRef.current = false;
     }
     const [filtervaluesreducer , dispatchfiter] = useReducer(reducerFitler , initFilter)
     useEffect(() => {
+        const handler = setTimeout(() => {
+          setDebouncedFilter(filtervaluesreducer);
+        
+        }, 1000); // Délai d'attente de 1 seconde
+    
+        return () => {
+          clearTimeout(handler);
+        };
+      }, [filtervaluesreducer]);
+    
+      useEffect(() => {
+        if (isFilterValid(debouncedFilter) && !isLoadingRef.current) {
+          console.log("avant filter :  ", debouncedFilter);
+    
+          // Verrouillage avant de lancer l'appel
+          isLoadingRef.current = true;
+    
+          axios
+            .post("http://localhost:5000/patient/SerchPatients", debouncedFilter)
+            .then((response) => {
+              console.log(response.data);
+              dispatchfiter({
+                type: "setSearchResults",
+                payload: response.data.Patients,
+              });
+              console.log("filter :", filtervaluesreducer);
+            })
+            .catch((error) => {
+              console.error("Erreur lors de la recherche:", error);
+            })
+            .finally(() => {
+              // Déverrouillage après la fin de l'appel
+              
+            });
+        }
+      }, [debouncedFilter]);
+ 
+      /*  useEffect(() => {
         
         if (isFilterValid()) {
           // Faire l'appel API pour rechercher les données
-          console.log(filtervaluesreducer)
+     
           
           axios.post('http://localhost:5000/patient/SerchPatients', filtervaluesreducer)
             .then(response => {
@@ -71,43 +130,69 @@ export default function UserData() {
                 type: "setSearchResults",
                 payload: response.data.Patients
               });
+              console.log("filter :",filtervaluesreducer)
             })
             .catch(error => {
               console.error('Erreur lors de la recherche:', error);
             });
         }
-      }, [filtervaluesreducer]);  // L'appel API se déclenche dès qu'un filtre change
+      }, [filtervaluesreducer]); */ // L'appel API se déclenche dès qu'un filtre change
+     
     const theresult = (ele)=> {
         
         return (
             <tr identifier={ele?.matricule} >
             <td onClick={()=>{
-            
-            handShow(ele)
+            passwordReq.current.classList.add('active');
+            setActionDelAdd(2)
+            setshowPatient(ele)
         }}
         onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }}
         > {ele?.matricule } </td>
             <td onClick={()=>{
-            
-            handShow(ele)
+            passwordReq.current.classList.add('active');
+            setActionDelAdd(2)
+            setshowPatient(ele)
+           
         }}  
         onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }}
         > {ele?.nom_patient } </td>
             <td onClick={()=>{
+            passwordReq.current.classList.add('active');
+            setActionDelAdd(2)
+            setshowPatient(ele)
             
-            handShow(ele)
         }} onContextMenu={(e)=> {
             handlRightClickRemove(e)
         }
         } > {ele?.next_appointment_date } </td>
+         <td onClick={()=>{
+            passwordReq.current.classList.add('active');
+            setActionDelAdd(2)
+            setshowPatient(ele)
+            
+        }} onContextMenu={(e)=> {
+            handlRightClickRemove(e)
+        }
+        } > {ele?.diagnosis } </td>
+         <td onClick={()=>{
+            passwordReq.current.classList.add('active');
+            setActionDelAdd(2)
+            setshowPatient(ele)
+            
+        }} onContextMenu={(e)=> {
+            handlRightClickRemove(e)
+        }
+        } > {ele?.etat } </td>
         </tr>
         
     )
     }
+   
     // //////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -117,6 +202,7 @@ export default function UserData() {
         // del = 0 / add = 1 
         
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const [list , setlist] = useState(1) // defnie ama 50
     const [showPatient , setshowPatient] = useState()
     const [User , setUser] = useState()
     const [passManager , setpassManager] = useState()
@@ -501,17 +587,7 @@ export default function UserData() {
     }
     
     
-    function handlRightClickRemove(e) {
-        e.preventDefault()
-        e.target.parentElement.classList.toggle('selected')
-        let item = e.target.parentElement.getAttribute('identifier')
-        if (listOfTheDeletedObejcts.indexOf(item) === -1) {
-            setListOfTheDeletedObejcts((prev)=>([...prev,item]))
-        } else {
-            setListOfTheDeletedObejcts((prev)=> (prev.filter((ele)=>(ele !== item ? ele : null))))
-        }
-        
-    }
+   
     useEffect(() => {
         console.log(listOfTheDeletedObejcts)
         if (listOfTheDeletedObejcts.length > 0) {
@@ -684,9 +760,10 @@ export default function UserData() {
             console.error("Aucune donnée trouvée dans localStorage");
         }
         axios.post('http://localhost:5000/patient/getPatient',{
+            list : list
         }).then(response => {
             console.log(response.data);
-
+            
       const data1 = response.data.data || [];
       setdataPatient(data1);
 
@@ -1387,106 +1464,113 @@ export default function UserData() {
                 </p>
             </div>
             <div className="searchingFilter">
-                <h2>searching by : </h2>
-                <form action="">
-                    <input type="number" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.patientMatricule} name="matricule" id="" placeholder="matricule" />
-                    <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.patientName} name="patientName" id="" placeholder="patientName" />
-                    <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.diagnosis} name="diagnosis" id="" placeholder="diagnosis" />
-                    <input type="text" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.etat} name="etat" id="" placeholder="etat" />
-                    <input type="date" onChange={(e)=>{changefiltervaluesreducerfunction(e)}} value={filtervaluesreducer.nextappointmentDate} name="appointmentDate" id="" placeholder="appointmentDate" />
-                    
-                </form>
-                {filtervaluesreducer.patientMatricule || filtervaluesreducer.patientName || filtervaluesreducer.nextappointmentDate ||filtervaluesreducer.diagnosis || filtervaluesreducer.etat ?
-                (<table ref={tab}>
-                    <tr>
-                        <th>Matricule</th>
-                        <th>Patient Name</th>
-                        <th>Next Appointment Date</th>
-                        <th>diagnosis</th>
-                        <th>etat</th>
-                    </tr>
-                    {
-                        filtervaluesreducer.searchResults.map((ele ,i)=> {
-                            let data = ele
-                            // console.log(ele)
-                            const message = (<p>data not existe</p>)
-                            if (!data) {
-                                return null
-                            } else {
-                                // console.log(data)
-                                // 1
-                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && !filtervaluesreducer.appointmentDate) {
-                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule)) && (ele.nom_patient.includes((filtervaluesreducer.patientName)))) {
-                                        return theresult(ele)
-                                    }
-                                    else {
-                                        return null
-                                    }
-                                }
-                                // 2
-                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.nextappointmentDate && !filtervaluesreducer.patientName) {
-                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
-                                        return theresult(ele)
-                                    }
-                                    else {
-                                        return null
-                                    }
-                                }
-                                // 3
-                                if (filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate && !filtervaluesreducer.matricule ) {
-                                    if (ele.nom_patient.includes((filtervaluesreducer.patientName)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
-                                        return theresult(ele)
-                                    }
-                                    else {
-                                        return null
-                                    }
-                                }
-                                // 4
-                                if (filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate ) {
-                                    if ((ele.matricule === parseInt((filtervaluesreducer.patientMatricule))) &&  ele.nom_patient.includes((filtervaluesreducer.patientName)) && (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate)))) {
-                                        return theresult(ele)
-                                    }
-                                    else {
-                                        return null
-                                    }
-                                }
-                                // 5
-                                if (filtervaluesreducer.patientMatricule && !filtervaluesreducer.patientName && !filtervaluesreducer.nextappointmentDate) {
-                                    if (ele.matricule === parseInt((filtervaluesreducer.patientMatricule))) {
-                                        return theresult(ele)
-                                    }else {
-                                        return null
-                                    }
+  <h2>Searching by:</h2>
+  <form action="">
+    <input
+      type="number"
+      onChange={(e) => {
+        changefiltervaluesreducerfunction(e);
+      }}
+      value={filtervaluesreducer.patientMatricule}
+      name="patientMatricule"
+      placeholder="matricule"
+    />
+    <input
+      type="text"
+      onChange={(e) => {
+        changefiltervaluesreducerfunction(e);
+      }}
+      value={filtervaluesreducer.patientName}
+      name="patientName"
+      placeholder="patientName"
+    />
+    <input
+      type="text"
+      onChange={(e) => {
+        changefiltervaluesreducerfunction(e);
+      }}
+      value={filtervaluesreducer.diagnosis}
+      name="diagnosis"
+      placeholder="diagnosis"
+    />
+    <input
+      type="text"
+      onChange={(e) => {
+        changefiltervaluesreducerfunction(e);
+      }}
+      value={filtervaluesreducer.etat}
+      name="etat"
+      placeholder="etat"
+    />
+    <input
+      type="date"
+      onChange={(e) => {
+        changefiltervaluesreducerfunction(e);
+      }}
+      value={filtervaluesreducer.nextappointmentDate}
+      name="nextappointmentDate"
+      placeholder="appointmentDate"
+    />
+  </form>
 
-                                }
-                                // 6
-                                if (!filtervaluesreducer.patientMatricule && filtervaluesreducer.patientName && !filtervaluesreducer.nextappointmentDate ) {
-                                    if (ele.nom_patient.includes((filtervaluesreducer.patientMatricule))) {
-                                        return theresult(ele)
-                                    }else {
-                                        return null
-                                    }
-                                }
-                                // 7
-                                if (!filtervaluesreducer.patientMatricule && !filtervaluesreducer.patientName && filtervaluesreducer.nextappointmentDate ) {
-                                    if (ele.next_appointment_date.includes((filtervaluesreducer.nextappointmentDate))) {
-                                        return theresult(ele)
-                                    }else {
-                                        return null
-                                    }
-                                }
-                                // 8 -<>-
-                                
-                            }
-                            }
-                        )
-                        
-                        
-                    }      
-                </table>) :
-                null}
-            </div>
-            {!(filtervaluesreducer.matricule || filtervaluesreducer.patientName || filtervaluesreducer.nextappointmentDate) ?
+  {(filtervaluesreducer.patientMatricule ||
+    filtervaluesreducer.patientName ||
+    filtervaluesreducer.nextappointmentDate ||
+    filtervaluesreducer.diagnosis ||
+    filtervaluesreducer.etat) ? (
+    <div className="info">
+      <div className="top">
+        <h2>Patient Schedule Template</h2>
+        <div>
+          <button
+            onClick={() => {
+              passwordReq.current.classList.add("active");
+              setActionDelAdd(0);
+            }}
+            ref={del}
+            do="remove"
+          >
+            Remove
+          </button>
+          <button onClick={handlAdd} do="add">
+            Add A Patient
+          </button>
+        </div>
+      </div>
+      <table ref={tab}>
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Patient Name</th>
+            <th>Next Appointment Date</th>
+            <th>Diagnosis</th>
+            <th>Etat</th>
+          </tr>
+        </thead>
+        <tbody>
+        {Array.isArray(filtervaluesreducer.searchResults.data) &&
+  filtervaluesreducer.searchResults.data.map((ele, i) => {
+    console.log("9ble afficher", filtervaluesreducer);
+    console.log("hada", ele);
+
+    if (!ele) return null;
+
+    return theresult(ele);
+   
+  })}
+
+
+        </tbody>
+      </table>
+    </div>
+  ) : null}
+</div>
+
+            {!(filtervaluesreducer.patientMatricule ||
+    filtervaluesreducer.patientName ||
+    filtervaluesreducer.nextappointmentDate ||
+    filtervaluesreducer.diagnosis ||
+    filtervaluesreducer.etat) ?
             (<div className="info">
                 <div className="top">
                     <h2>Patient Schedule Template</h2>

@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
     const verificationCode = crypto.randomBytes(3).toString('hex');
     console.log(verificationCode)
     verificationCodes.set(email, { username, password, code: verificationCode ,passEditor,passManager});
-   // await sendVerificationEmail(email, verificationCode);
+   await sendVerificationEmail(email, verificationCode);
 
     res.status(200).json({ message: 'Code de vérification envoyé.' });
   } catch (error) {
