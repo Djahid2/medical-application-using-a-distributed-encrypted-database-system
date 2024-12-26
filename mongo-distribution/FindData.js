@@ -3,7 +3,7 @@ const Key = require("../crypto/modules/key");
 const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
 require('../crypto/modules/aesCTR.js'); 
 const Aes = require('../crypto/modules/aes.js');
-const {getLastMatricules} = require('./GetLastMat.js');
+const {getLastMatricules,getLast50Matricules} = require('./GetLastMat.js');
 
 
 const NODE_URIS = [
@@ -168,12 +168,12 @@ async function getLatestData(matricules) {
 
   return dataList;
 }
+/*
 
 
 /*findData(20241631029).then(data => {
   console.log(data); 
 });
-
 
 findKey(20241631030).then(key => {
   console.log(key); 
@@ -184,14 +184,14 @@ findKey(20241631030).then(key => {
   console.log(lastFive); 
   console.log(getLatestData(lastFive));// Array of the last 5 matricules with their decrypted data
 });
+*/
 
 (async () => {
-  const matricules = await getLastMatricules();
+  const matricules = await getLast50Matricules(2);
   console.log(matricules)
   const data = await getLatestData(matricules);
   console.log("Fetched data:", data);
 })();
-*/
 
 
 module.exports = {findData,findKey,getLatestData};

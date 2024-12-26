@@ -25,11 +25,11 @@ async function RechercheNom(Nom) {
 
   const result = {
     count: filteredData.length,
-    matricules: filteredData.map(data => data.matricule) 
+    data : filteredData,
   };
 
   if (result.count > 0) {
-    console.log(`Found ${result.count} matches for name '${Nom}':`, result.matricules);
+    console.log(`Found ${result.count} matches for name '${Nom}':`, result.data.map(data => data.matricule));
   } else {
     console.log(`No matches found for name '${Nom}'.`);
   }
@@ -66,12 +66,12 @@ async function RechercheDiagnosis(Diagnosis, matricules = []) {
     // Construct the result object
     const result = {
       count: filteredData.length,
-      matricules: filteredData.map(data => data.matricule)
+      data : filteredData,
     };
 
     // Log results
     if (result.count > 0) {
-      console.log(`Found ${result.count} matches for Diagnosis '${Diagnosis}':`, result.matricules);
+      console.log(`Found ${result.count} matches for Diagnosis '${Diagnosis}':`, result.data.map(data => data.matricule));
     } else {
       console.log(`No matches found for Diagnosis '${Diagnosis}'.`);
     }
@@ -117,12 +117,13 @@ async function RechercheFileStatus(etat, matricules = []) {
     // Construct the result object
     const result = {
       count: filteredData.length,
-      matricules: filteredData.map(data => data.matricule)
+      data : filteredData,
+
     };
 
     // Log results
     if (result.count > 0) {
-      console.log(`Found ${result.count} matches for etat '${etat}':`, result.matricules);
+      console.log(`Found ${result.count} matches for etat '${etat}':`, result.data.map(data => data.matricule));
     } else {
       console.log(`No matches found for etat '${etat}'.`);
     }
@@ -136,15 +137,15 @@ async function RechercheFileStatus(etat, matricules = []) {
 module.exports = {RechercheFileStatus,RechercheDiagnosis,RechercheNom}
 /*
 RechercheNom("Abdou").then(nameResult => {
-  const nameMatricules = nameResult.matricules; 
+  const nameMatricules = nameResult.data.map(data => data.matricule); 
     return RechercheDiagnosis("cancer", nameMatricules);
 }).then(diagnosisResult => {
-  const diagnosisMatricules = diagnosisResult.matricules; 
+  const diagnosisMatricules = diagnosisResult.data.map(data => data.matricule); 
 
   return RechercheFileStatus("inactive", diagnosisMatricules);
 }).then(fileStatusResult => {
   console.log(`Number of elements found: ${fileStatusResult.count}`);
-  console.log("Matricules of matching elements:", fileStatusResult.matricules);
+  console.log("Matricules of matching elements:", fileStatusResult.data);
 }).catch(error => {
   console.error("An error occurred:", error);
 });

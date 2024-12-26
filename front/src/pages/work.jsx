@@ -5,12 +5,12 @@ export default function Work () {
             <div className="container">
                 <div className="top">
                     <div className="hero">
-                        <h2>who it Work</h2>
+                        <h2>How it Works ?</h2>
                         <p>At Secur, we specialize in providing a secure and efficient solution for storing and managing sensitive medical data. Our system is built on cutting-edge technology and advanced security measures to ensure that medical professionals and institutions can access and store data with confidence.</p>
                     </div>
                     <div className="why">
                         <div>
-                        <h3>Why Choose Secur ?</h3>
+                        <h3>Why Choosing Secur ?</h3>
                         <p>
                         By combining security, scalability, and compliance, Secur provides an all-in-one platform for medical institutions to securely manage their     data while keeping up with technological and regulatory advancements.
                         </p>
@@ -22,11 +22,11 @@ export default function Work () {
                     <div className="cards">
                         <div className="card">
                             <h3>Advanced Encryption for Maximum Security</h3>
-                            <p>Secur employs state-of-the-art encryption algorithms to safeguard medical data at every stage—during transmission, storage, and access. This ensures that even in the event of unauthorized access, sensitive data remains indecipherable.</p>
+                            <p>Secur employs state-of-the-art <b>encryption algorithms</b> to safeguard medical data at every stage—during transmission, storage, and access. This ensures that even in the event of unauthorized access, sensitive data remains indecipherable.</p>
                         </div>
                         <div className="card">
-                            <h3>Scalable Big Data Management with HBase</h3>
-                            <p>By leveraging HBase, a powerful NoSQL database, Secur can efficiently handle large and complex datasets. Whether you're managing thousands of records or scaling up to millions, Secur delivers consistent performance and reliability.</p>
+                            <h3>Scalable Big Data Management with MongoDB</h3>
+                            <p>By leveraging MongoDB, a powerful NoSQL database, Secur can efficiently handle large and complex datasets. Whether you're managing thousands of records or scaling up to millions, Secur delivers consistent performance and reliability.</p>
                         </div>
                         <div className="card">
                             <h3>Compliance with Healthcare Data Standards</h3>

@@ -108,6 +108,41 @@ async function getLastMatricules() {
     }
     return DecryptedMat;
 }
+async function getLast50Matricules(offset) {
+    const DecryptedMat = [];
+    const batchSize = 50; // Number of documents per page
+    const skipCount = (offset - 1) * batchSize; // Calculate the number of documents to skip
+
+    for (const uri of NODE_URIS) {
+        const client = new MongoClient(uri);
+        try {
+            await client.connect();
+            const db = client.db();
+            const collection = db.collection("dossier_medical");
+
+            // Use $natural to get documents in reverse insertion order
+            const cursor = collection
+                .find({})
+                .sort({ $natural: -1 }) // Fetch documents in reverse insertion order
+                .skip(skipCount)  // Skip documents for the offset
+                .limit(batchSize); // Limit to 50 documents
+
+            // Iterate through the cursor and decrypt matricules
+            for await (const doc of cursor) {
+                if (doc && doc.patient_matricule) {
+                    const decryptedMatricule = await decryptMatricule(doc._id, doc.patient_matricule);
+                    DecryptedMat.push(decryptedMatricule);
+                }
+            }
+        } catch (err) {
+            console.error(`Error connecting to ${uri}:`, err.message);
+        } finally {
+            await client.close();
+        }
+    }
+
+    return DecryptedMat;
+}
 
 async function decryptMatricule(id, matricule) {
     let foundData = null;
@@ -174,6 +209,7 @@ async function decryptMatricule(id, matricule) {
     }
 }
 
-module.exports = {getLastMatricule,getLastMatricules};
+  
+module.exports = {getLastMatricule,getLastMatricules,getLast50Matricules};
 
 

@@ -1,3 +1,63 @@
+var Key = {};
+
+Key.sha256 = function (data) {
+  // Encodage de données sous forme binaire
+  const encodedData = new TextEncoder().encode(data);
+  
+  // Initialisation des constantes simplifiées SHA-256
+  const hash = new Uint32Array(8);
+  for (let i = 0; i < 8; i++) hash[i] = 0x6a09e667 + i * 0x510e527f; // Valeurs arbitraires
+  
+  // Effectuer des transformations (simplifiées pour cet exemple)
+  for (let i = 0; i < encodedData.length; i++) {
+    const j = i % 8;
+    hash[j] = (hash[j] + encodedData[i] * (i + 1)) >>> 0;
+  }
+  
+  // Retourner le hash sous forme de Buffer
+  const result = new Uint8Array(hash.buffer);
+  return result;
+};
+
+// Fonction manuelle HMAC-SHA256
+Key.hmacSHA256 = function (data) {
+  const key= "secretkey" ;
+  if (typeof data === "string") data = new TextEncoder().encode(data);
+
+  const blockSize = 64; // Taille du bloc pour SHA-256
+  let paddedKey = key;
+
+  // Si la clé est plus grande que le bloc, la hacher
+  if (key.length > blockSize) {
+    paddedKey = Key.sha256(key);
+  }
+
+  // Compléter la clé pour atteindre la taille de 64 octets
+  if (paddedKey.length < blockSize) {
+    const temp = new Uint8Array(blockSize);
+    temp.set(paddedKey);
+    paddedKey = temp;
+  }
+
+  // Calculer les paddings
+  const oKeyPad = new Uint8Array(blockSize);
+  const iKeyPad = new Uint8Array(blockSize);
+
+  for (let i = 0; i < blockSize; i++) {
+    oKeyPad[i] = paddedKey[i] ^ 0x5c;
+    iKeyPad[i] = paddedKey[i] ^ 0x36;
+  }
+
+  // HMAC-SHA256
+  const innerHash = Key.sha256(new Uint8Array([...iKeyPad, ...data]));
+  const hmac = Key.sha256(new Uint8Array([...oKeyPad, ...innerHash]));
+
+  return Array.from(hmac).map(byte => byte.toString(16).padStart(2, "0")).join("");
+};
+
+/*
+
+
 const crypto = require("crypto");
 var Key = {};
 // Fonction pour calculer un HMAC-SHA256
@@ -59,6 +119,7 @@ Key.pbkdf2 = function (password, salt, iterations, keyLength) {
   return derivedKey.slice(0, keyLength);
 }
 
+
 // Fonction pour générer une clé à partir d'un mot de passe
 Key.generateKey = function (password, salt, iterations = 1000, keySize = 32) {
   return Key.pbkdf2(password, salt, iterations, keySize);
@@ -66,7 +127,7 @@ Key.generateKey = function (password, salt, iterations = 1000, keySize = 32) {
 
 if (typeof module != 'undefined' && module.exports) module.exports = Key; 
 
-/**--------------------------------CHIFFREMENT/DECHIFFREMENT------------------------------- */
+/**--------------------------------CHIFFREMENT/DECHIFFREMENT------------------------------- 
 
 
 // Fonction pour chiffrer les données avec AES et PBKDF2
@@ -110,6 +171,7 @@ Key.decryptAESWithPBKDF2 = function (encryptedData, password) {
   }
 }
 
-
+*/
+module.exports =  Key ;
 
 
