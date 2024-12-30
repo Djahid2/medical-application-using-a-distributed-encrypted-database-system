@@ -134,7 +134,6 @@ async function RechercheFileStatus(etat, matricules = []) {
     throw error;
   }
 }
-module.exports = {RechercheFileStatus,RechercheDiagnosis,RechercheNom}
 /*
 RechercheNom("Abdou").then(nameResult => {
   const nameMatricules = nameResult.data.map(data => data.matricule); 
@@ -150,3 +149,43 @@ RechercheNom("Abdou").then(nameResult => {
   console.error("An error occurred:", error);
 });
 */
+async function RechercheDateAppointment(date, matricules = []) {
+  try {
+    // Check if matricules is empty
+    if (matricules.length === 0) {
+      matricules = await getLastMatricules();
+    }
+
+    // Fetch latest data for the provided matricules
+    const dataList = await getLatestData(matricules);
+    console.log("Fetched data:", dataList);
+
+    // Filter the data to match the provided Diagnosis
+    const filteredData = dataList.filter(data => {
+      const appointmentDate = data.next_appointment_date ? data.next_appointment_date.split('T')[0] : '';
+      return appointmentDate === date;
+    });
+    
+
+    // Construct the result object
+    const result = {
+      count: filteredData.length,
+      data : filteredData,
+
+    };
+
+    // Log results
+    if (result.count > 0) {
+      console.log(`Found ${result.count} matches for date '${date}':`, result.data.map(data => data.matricule));
+    } else {
+      console.log(`No matches found for etat '${date}'.`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("An error occurred:", error);
+    throw error;
+  }
+}
+
+module.exports = {RechercheFileStatus,RechercheDiagnosis,RechercheNom,RechercheDateAppointment}

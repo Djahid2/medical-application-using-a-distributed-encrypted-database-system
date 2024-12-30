@@ -8,7 +8,7 @@ const Aes = require('../../crypto/modules/aes');
 require('../../crypto/modules/aesCTR');
 const {deleteData} = require("../DeleteData");
 const {modifyData} = require("../ModifyData")
-const {RechercheNom,RechercheFileStatus,RechercheDiagnosis} = require("../RechercheData")
+const {RechercheNom,RechercheFileStatus,RechercheDiagnosis,RechercheDateAppointment} = require("../RechercheData")
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
   "mongodb://localhost:27019/dossier_medical",
@@ -389,31 +389,38 @@ async function transformPatientData(patientData) {
 
 exports.SerchPatients = async (req,res) => {
   try{
+    let liste_matricules
     let Patients
-     const data = req.body
+    let data = req.body
      console.log("data liwslet :" ,data)
      if(data.patientMatricule){
        Patients = await findData(data.patientMatricule)
+       
        Patients = await transformPatientData(Patients)
        return res.status(200).json({ message: "Patient get", Patients :  {data : [Patients]} })
      }else{
      if(data.patientName ){
        Patients = await RechercheNom(data.patientName)
        if(data.diagnosis){
-        Patients = await RechercheDiagnosis(data.diagnosis,Patients.matricules )
-        if(data.etat) Patients = await RechercheFileStatus(data.etat ,Patients.matricules)
-       }else if(data.etat) Patients = await RechercheFileStatus(data.etat ,Patients.matricules)
+       liste_matricules = Patients.data.map(patient => patient.matricule);
+        Patients = await RechercheDiagnosis(data.diagnosis,liste_matricules )
+        if(data.etat){ liste_matricules = Patients.data.map(patient => patient.matricule); Patients = await RechercheFileStatus(data.etat ,liste_matricules)}
+        if(data.nextappointmentDate) { liste_matricules = Patients.data.map(patient => patient.matricule); Patients = await RechercheDateAppointment(data.nextappointmentDate,liste_matricules)}
+       }else {if(data.etat) { liste_matricules = Patients.data.map(patient => patient.matricule);Patients = await RechercheFileStatus(data.etat ,liste_matricules);} if(data.nextappointmentDate) { liste_matricules = Patients.data.map(patient => patient.matricule); Patients = await RechercheDateAppointment(data.nextappointmentDate,liste_matricules)}}
      }else{
       if(data.diagnosis){
         Patients = await RechercheDiagnosis(data.diagnosis)
-        if(data.etat) Patients = await RechercheFileStatus(data.etat ,Patients.matricules)
-       }else if(data.etat) {Patients = await RechercheFileStatus(data.etat)} else {
-      // reprendre tout les donner dans ce cas 
+        liste_matricules = Patients.data.map(patient => patient.matricule);
+        if(data.etat) Patients = await RechercheFileStatus(data.etat ,liste_matricules)
+          if(data.nextappointmentDate){  liste_matricules = Patients.data.map(patient => patient.matricule); Patients = await RechercheDateAppointment(data.nextappointmentDate,liste_matricules)}
+       }else if(data.etat) {Patients = await RechercheFileStatus(data.etat); liste_matricules = Patients.data.map(patient => patient.matricule); if(data.nextappointmentDate) Patients = await RechercheDateAppointment(data.nextappointmentDate,liste_matricules)} else {
+        if(data.nextappointmentDate) Patients = await RechercheDateAppointment(data.nextappointmentDate)
+          else{
         (async () => {
           const matricules = await getLastMatricules();
             Patients = await getLatestData(matricules);
           return res.status(200).json({ message: "Patient get", Patients : {data : [Patients]} });
-        })();
+        })(); }
       }
      }
     }
