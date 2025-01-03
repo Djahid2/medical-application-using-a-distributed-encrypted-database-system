@@ -1,5 +1,5 @@
 const { MongoClient } = require("mongodb");
-const Key = require("../crypto/modules/key");
+const Key = require("./crypto/modules/key");
 
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",

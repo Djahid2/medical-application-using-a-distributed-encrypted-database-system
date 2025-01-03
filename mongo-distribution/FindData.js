@@ -1,8 +1,8 @@
 const { MongoClient } = require("mongodb");
-const Key = require("../crypto/modules/key");
-const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
-require('../crypto/modules/aesCTR.js'); 
-const Aes = require('../crypto/modules/aes.js');
+const Key = require("./crypto/modules/key");
+const { extract_positions, RevealKey } = require('./crypto/modules/extract_positions.js');
+require('./crypto/modules/aesCTR.js'); 
+const Aes = require('./crypto/modules/aes.js');
 const {getLastMatricules,getLast50Matricules} = require('./GetLastMat.js');
 
 
@@ -168,12 +168,12 @@ async function getLatestData(matricules) {
 
   return dataList;
 }
-/*
 
 
-/*findData(20241631029).then(data => {
+findData(20241631029).then(data => {
   console.log(data); 
 });
+/*
 
 findKey(20241631030).then(key => {
   console.log(key); 

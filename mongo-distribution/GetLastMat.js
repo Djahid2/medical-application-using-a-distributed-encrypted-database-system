@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb");
-require('../crypto/modules/aesCTR.js'); 
-const Aes = require('../crypto/modules/aes.js');
-const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
+require('./crypto/modules/aesCTR.js'); 
+const Aes = require('./crypto/modules/aes.js');
+const { extract_positions, RevealKey } = require('./crypto/modules/extract_positions.js');
 
 
 const NODE_URIS = [

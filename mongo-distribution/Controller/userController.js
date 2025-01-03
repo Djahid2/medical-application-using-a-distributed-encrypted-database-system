@@ -1,11 +1,11 @@
 const { MongoClient } = require("mongodb");
 const FailedLoginAttempt = require('./Failedlogin');
-const Key = require('../../crypto/modules/key');
+const Key = require('../crypto/modules/key');
 const {distributeData} = require('../InsertData');
 const {getLastMatricules,getLast50Matricules} = require("../GetLastMat");
 const {getLatestData,findData} = require("../FindData")
-const Aes = require('../../crypto/modules/aes');
-require('../../crypto/modules/aesCTR');
+const Aes = require('../crypto/modules/aes');
+require('../crypto/modules/aesCTR');
 const {deleteData} = require("../DeleteData");
 const {modifyData} = require("../ModifyData")
 const {RechercheNom,RechercheFileStatus,RechercheDiagnosis,RechercheDateAppointment} = require("../RechercheData")
