@@ -728,7 +728,7 @@ export default function UserData() {
       // fonction qui permet d'ajouter le patient 
     function  Addpatient() {
         axios.post('http://localhost:5000/patient/addpatient',{
-            data : valueChageReduce,
+            data1 : valueChageReduce,
             passManager : passManager,
             user : User.data.info,
         }).then(response => {
@@ -765,7 +765,8 @@ export default function UserData() {
             console.log(response.data);
             
       const data1 = response.data.data || [];
-      setdataPatient(data1);
+      const sortedData = [...data1].sort((a,b)=>b.matricule- a.matricule);
+      setdataPatient(sortedData);
 
       const calculatedLength = Math.ceil(data1.length / 10); // Calcul de la pagination
       setlength_data_patient(calculatedLength);

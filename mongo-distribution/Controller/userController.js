@@ -205,12 +205,34 @@ async function removeDynamicKeys(data) {
 exports.AddPatient = async (req, res) =>{
 try{
   let {data1 ,passManager , user}  = req.body;
+  
+  console.log("user",user)
   //Etap1 verfier Admin 
   const extractedKey = user.slice(4, 4 + 9);
   const originalEncryptedInfo = user.slice(0, 4) + user.slice( 4 + 9);
-  const decryptedInfo =  Aes.Ctr.decrypt(originalEncryptedInfo, extractedKey,256);
-  console.log(decryptedInfo)
-  let email = decryptedInfo.email
+  const decryptedInfo =  Aes.Ctr.decrypt(originalEncryptedInfo, extractedKey,256); 
+  console.log("dec",decryptedInfo)
+  let email;
+    if (typeof decryptedInfo === 'string') {
+      try {
+        const parsedInfo = JSON.parse(decryptedInfo);
+        email = parsedInfo.email;
+      } catch (e) {
+        console.error("Failed to parse decryptedInfo:", e);
+      }
+    } else {
+      email = decryptedInfo.email;
+    }
+
+    console.log("Email:", email);
+
+    if (!email) {
+      return res.status(400).json({ error: "Email not found in decrypted info" });
+    }
+
+  
+
+  console.log('email : ',email);
   passManager = Key.hmacSHA256(passManager).toString('hex');
   let userId = null; // ID partagé entre les bases
   let client = null;
@@ -254,6 +276,7 @@ try{
             return res.status(400).json({ error: "Password is incorrect" });
           }
   //Etap 2 ajouter Patient
+  console.log('data : ',data1)
   const data = await  removeDynamicKeys(data1);
   console.log(data)
   console.log("status",data.file_status)
