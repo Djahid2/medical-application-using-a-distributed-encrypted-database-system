@@ -1,9 +1,9 @@
 const { MongoClient } = require("mongodb");
-const Key = require("../crypto/modules/key");
+const Key = require("./crypto/modules/key");
 const { findData, findKey } = require('./FindData');
-const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
-require('../crypto/modules/aesCTR.js'); 
-const Aes = require('../crypto/modules/aes.js');
+const { extract_positions, RevealKey } = require('./crypto/modules/extract_positions.js');
+require('./crypto/modules/aesCTR.js'); 
+const Aes = require('./crypto/modules/aes.js');
 
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",

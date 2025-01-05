@@ -1,8 +1,8 @@
 const { MongoClient } = require("mongodb");
-const Key = require("../crypto/modules/key");
-const { extract_positions, RevealKey } = require('../crypto/modules/extract_positions.js');
-require('../crypto/modules/aesCTR.js'); 
-const Aes = require('../crypto/modules/aes.js');
+const Key = require("./crypto/modules/key");
+const { extract_positions, RevealKey } = require('./crypto/modules/extract_positions.js');
+require('./crypto/modules/aesCTR.js'); 
+const Aes = require('./crypto/modules/aes.js');
 const { getLastMatricules } = require('./GetLastMat.js');
 const { getLatestData } = require('./FindData.js');
 

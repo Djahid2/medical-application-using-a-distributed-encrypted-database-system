@@ -1,8 +1,8 @@
 const { MongoClient } = require("mongodb");
-const Key = require("../crypto/modules/key");
-require('../crypto/modules/aesCTR.js'); 
-const Aes = require('../crypto/modules/aes.js');
-const { extract_positions, HideKey,generateRandomKey } = require('../crypto/modules/extract_positions.js');
+const Key = require("./crypto/modules/key");
+require('./crypto/modules/aesCTR.js'); 
+const Aes = require('./crypto/modules/aes.js');
+const { extract_positions, HideKey,generateRandomKey } = require('./crypto/modules/extract_positions.js');
 const {getLastMatricule} = require('./GetLastMat.js');
 
 const NODE_URIS = [
@@ -143,6 +143,6 @@ async function main() {
 }
 }
 
-//main().catch(console.error);
+main().catch(console.error);
 
 module.exports = {distributeData}

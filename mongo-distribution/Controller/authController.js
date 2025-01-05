@@ -3,9 +3,9 @@ const { sendVerificationEmail } = require('../service/mailService');
 const {connectToDatabase} = require('../Config/db')
 const { MongoClient } = require("mongodb");
 const crypto = require('crypto');
-const Key = require('../../crypto/modules/key');
-const Aes = require('../../crypto/modules/aes');
-require('../../crypto/modules/aesCTR')
+const Key = require('../crypto/modules/key');
+const Aes = require('../crypto/modules/aes');
+require('../crypto/modules/aesCTR')
 const NODE_URIS = [
   "mongodb://localhost:27018/dossier_medical",
   "mongodb://localhost:27019/dossier_medical",
