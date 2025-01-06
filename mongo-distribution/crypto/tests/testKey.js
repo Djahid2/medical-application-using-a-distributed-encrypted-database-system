@@ -13,3 +13,4 @@ const data1 = "Hello"; // Données en tant que chaîne
 console.log("Le Hach du mot Hello :",Key.hmacSHA256("Hello").toString("hex"));
 console.log("Le Hach du mot Hellojsdnjejfekzlejk :", Key.hmacSHA256("Hellojsdnjejfekzlejk").toString("hex"));
 console.log("Le Hach du mot a :", Key.hmacSHA256("a").toString("hex"));
+console.log("Le Hach du mot heyhey :", Key.hmacSHA256("heyhey").toString("hex"));
