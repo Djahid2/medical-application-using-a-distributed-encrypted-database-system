@@ -1603,7 +1603,6 @@ export default function UserData() {
                                     <td onClick={()=>{
                                     passwordReq.current.classList.add('active');
                                     setActionDelAdd(2)
-                                    handShow(data)
                                     setshowPatient(data)
                                 }}
                                 onContextMenu={(e)=> {
